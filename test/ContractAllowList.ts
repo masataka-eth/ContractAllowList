@@ -28,9 +28,9 @@ const deploy = async (owner: Signer) => {
   const testNFT = await TestNFTcollection.connect(owner).deploy()
   await testNFT.deployed()
 
-  testNFT.connect(owner).pause(false)
-  testNFT.connect(owner).setOnlyWhitelisted(false)
-  testNFT.connect(owner).setICAL(contractAllowList.address)
+  await testNFT.connect(owner).pause(false)
+  await testNFT.connect(owner).setOnlyWhitelisted(false)
+  await testNFT.connect(owner).setICAL(contractAllowList.address)
 
   return { calVoteToken, timelock, calGoverner, contractAllowList, testNFT }
 }
