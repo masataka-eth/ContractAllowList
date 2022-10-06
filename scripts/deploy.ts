@@ -1,18 +1,30 @@
-import { ethers } from "hardhat";
+import { ethers } from "hardhat"
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const CALVoteToken = await ethers.getContractFactory("CALVoteToken")
+  const calVoteToken = await CALVoteToken.deploy()
+  await calVoteToken.deployed()
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const Timelock = await ethers.getContractFactory("Timelock")
+  const timelock = await Timelock.deploy(2, [ethers.constants.AddressZero], [ethers.constants.AddressZero])
+  await timelock.deployed()
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const CALGoverner = await ethers.getContractFactory("CALGoverner")
+  const calGoverner = await CALGoverner.deploy(calVoteToken.address, timelock.address)
+  await calGoverner.deployed()
 
-  await lock.deployed();
+  const ContractAllowList = await ethers.getContractFactory("ContractAllowList")
+  const contractAllowList = await ContractAllowList.deploy(calGoverner.address)
+  await contractAllowList.deployed()
 
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  timelock.grantRole(await timelock.EXECUTOR_ROLE(), calGoverner.address)
+  timelock.grantRole(await timelock.PROPOSER_ROLE(), calGoverner.address)
+  timelock.grantRole(await timelock.CANCELLER_ROLE(), calGoverner.address)
+
+  console.log(`CALVoteToken deployed to ${calVoteToken.address}`);
+  console.log(`Timelock deployed to ${timelock.address}`);
+  console.log(`CALGoverner deployed to ${calGoverner.address}`);
+  console.log(`calGoverner deployed to ${contractAllowList.address}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
