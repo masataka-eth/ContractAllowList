@@ -15,12 +15,35 @@ contract ContractAllowList is Ownable, AccessControl{
     bytes32 public constant ADMINISTRATOR = keccak256("ADMINISTRATOR");
     bytes32 public constant CONTRACT_ALLOW_LIST = keccak256("CONTRACT_ALLOW_LIST");
 
-    function addContractAllowList(address _address) public {
-        require(hasRole(ADMINISTRATOR, msg.sender), "Caller is not a administrator");
+    // onlyOwner
+    function setAdminRole(address[] memory admins) external onlyOwner{
+        for (uint256 i = 0; i < admins.length; i++) {
+            _setupRole(ADMINISTRATOR, admins[i]);
+        }
+    }
+
+    function revokeAdminRole(address[] memory admins) external onlyOwner{
+        for (uint256 i = 0; i < admins.length; i++) {
+            _revokeRole(ADMINISTRATOR, admins[i]);
+        }
+    }
+
+    // modifier
+    modifier onlyAdmin() {
+        require(hasRole(ADMINISTRATOR, msg.sender), "Caller is not a administrator.");
+        _;
+    }
+
+    // external
+    function addContractAllowList(address _address) external onlyAdmin{
         _grantRole(CONTRACT_ALLOW_LIST, _address);
     }
 
-    function checkContractAllowList(address _address) public view returns(bool){
+    function deleteContractAllowList(address _address) external onlyAdmin{
+        _revokeRole(CONTRACT_ALLOW_LIST, _address);
+    }
+
+    function checkContractAllowList(address _address) external view returns(bool){
         if(hasRole(CONTRACT_ALLOW_LIST, _address)){
             return true;
         }else{
