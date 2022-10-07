@@ -7,9 +7,9 @@ We want to put in place a system to minimize the damage from NFT fraud.
 # How
 Only accept approve from a limited number of contract addresses.
 
-#Target Contracts
+# Target Contracts
 contracts>libs>ContractAllowList.sol
-icontracts>interface>iContractAllowList.solj
+*icontracts>interface>iContractAllowList.sol
 
-#Use Sample
+# Use Sample
 contracts>TestNFTcollection.sol
