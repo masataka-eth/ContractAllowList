@@ -3,52 +3,21 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "../interface/iContractAllowListCore.sol";
 
 contract ContractAllowList is Ownable, AccessControl{
 
+    iContractAllowListCore public iCALcore;
     constructor() {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(ADMINISTRATOR, msg.sender);
-        //addContractAllowList( 0x1E0049783F008A0085193E00003D00cd54003c71);//opensea goerli test network
-    }
+        iCALcore = iContractAllowListCore(0x53b7a2bF95cB4f00c98b115d13c6B6D1483472E3);   
+    } 
 
-    bytes32 public constant ADMINISTRATOR = keccak256("ADMINISTRATOR");
-    bytes32 public constant CONTRACT_ALLOW_LIST = keccak256("CONTRACT_ALLOW_LIST");
-
-    // onlyOwner
-    function setAdminRole(address[] memory admins) external onlyOwner{
-        for (uint256 i = 0; i < admins.length; i++) {
-            _setupRole(ADMINISTRATOR, admins[i]);
-        }
-    }
-
-    function revokeAdminRole(address[] memory admins) external onlyOwner{
-        for (uint256 i = 0; i < admins.length; i++) {
-            _revokeRole(ADMINISTRATOR, admins[i]);
-        }
-    }
-
-    // modifier
-    modifier onlyAdmin() {
-        require(hasRole(ADMINISTRATOR, msg.sender), "Caller is not a administrator.");
-        _;
-    }
-
-    // external
-    function addContractAllowList(address _address) external onlyAdmin{
-        _grantRole(CONTRACT_ALLOW_LIST, _address);
-    }
-
-    function deleteContractAllowList(address _address) external onlyAdmin{
-        _revokeRole(CONTRACT_ALLOW_LIST, _address);
+    function setICALcore(address _address) external onlyOwner {
+        iCALcore = iContractAllowListCore(_address);
     }
 
     function checkContractAllowList(address _address) external view returns(bool){
-        if(hasRole(CONTRACT_ALLOW_LIST, _address)){
-            return true;
-        }else{
-            return false;
-        }
+        return iCALcore.checkContractAllowList(_address);
     }
 
 }
