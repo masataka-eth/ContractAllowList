@@ -14,6 +14,7 @@ contract ContractAllowListCore is AccessControlEnumerable{
     bytes32 public constant ADMIN = keccak256("ADMIN");
     bytes32 public constant SETTER = keccak256("SETTER");
     bytes32 public constant CONTRACT_ALLOW_LIST = keccak256("CONTRACT_ALLOW_LIST");   
+    bool endOfOperation = false;
 
     // modifier
     modifier onlyAdmin() {
@@ -26,6 +27,10 @@ contract ContractAllowListCore is AccessControlEnumerable{
     }
 
     // external
+    function setEndOfOperation(bool _state) external onlyAdmin{
+        endOfOperation = _state;
+    }
+
     function setAdminRole(address[] memory admins) external onlyAdmin{
         for (uint256 i = 0; i < admins.length; i++) {
             _setupRole(ADMIN, admins[i]);
@@ -49,14 +54,14 @@ contract ContractAllowListCore is AccessControlEnumerable{
     function getContractAllowList() external view returns(address[] memory){
         uint256 ListCnt =  getRoleMemberCount(CONTRACT_ALLOW_LIST);
         address[] memory allowaddress = new address[](ListCnt);
-        for(uint256 i; i < ListCnt; i++){
+        for(uint256 i = 0; i < ListCnt; i++){
             allowaddress[i] = getRoleMember(CONTRACT_ALLOW_LIST,i);
         }
         return allowaddress;
     }
 
     function checkContractAllowList(address _address) external view returns(bool){
-        if(hasRole(CONTRACT_ALLOW_LIST, _address)){
+        if(hasRole(CONTRACT_ALLOW_LIST, _address) || endOfOperation == true){
             return true;
         }else{
             return false;
