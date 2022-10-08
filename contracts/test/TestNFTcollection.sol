@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "../core/interface/IContractAllowList.sol";
+import "../proxy/interface/IContractAllowListProxy.sol";
 
 contract TestNFTcollection is ERC721A, Ownable, AccessControl {
     constructor() ERC721A("TestNFTcollection", "TEST") {
@@ -200,7 +200,8 @@ contract TestNFTcollection is ERC721A, Ownable, AccessControl {
     //
     // Contract Allow List section
     //
-    IContractAllowList CAL;
+    IContractAllowListProxy CAL;
+    uint256 public target_level = 0;
 
     bool public useContractAllowList = true;
 
@@ -208,8 +209,12 @@ contract TestNFTcollection is ERC721A, Ownable, AccessControl {
         useContractAllowList = _state;
     }
 
+    function setContractAllowListLevel(uint256 _value) external onlyOwner{
+        target_level = _value;
+    }
+
     function setICAL(address _address) public onlyOwner {
-        CAL = IContractAllowList(_address);
+        CAL = IContractAllowListProxy(_address);
     }
 
     function _useContractAllowList() internal view returns (bool) {
@@ -222,7 +227,7 @@ contract TestNFTcollection is ERC721A, Ownable, AccessControl {
         override
     {
         if (_useContractAllowList()) {
-            bool result = CAL.isAllowed(operator);
+            bool result = CAL.isAllowed(operator,target_level);
             require(result, "setApprovalForAll is prohibited");
         }
 
@@ -236,7 +241,7 @@ contract TestNFTcollection is ERC721A, Ownable, AccessControl {
         override
     {
         if (_useContractAllowList()) {
-            require(CAL.isAllowed(to), "approve is prohibited");
+            require(CAL.isAllowed(to,target_level), "approve is prohibited");
         }
         super.approve(to, tokenId);
     }

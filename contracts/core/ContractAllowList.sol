@@ -16,7 +16,7 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
     // ==========================================================================
     // Section valiables
     // ==========================================================================
-    EnumerableSet.AddressSet private _allowedAddresses;
+    mapping(uint256 =>EnumerableSet.AddressSet) private allowedAddresses;
 
     // ==========================================================================
     // Section modifier
@@ -30,39 +30,47 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
     // Section external and public functions
     // ==========================================================================
 
-    constructor(address governor) {
+    constructor(address _governor) {
         _setRoleAdmin(ALLOW_LIST_EDITOR, ALLOW_LIST_EDITOR);
-        _setupRole(ALLOW_LIST_EDITOR, governor);
+        _setupRole(ALLOW_LIST_EDITOR, _governor);
 
         // For Test
-        _allowedAddresses.add(0x53b7a2bF95cB4f00c98b115d13c6B6D1483472E3);
-        _allowedAddresses.add(0x976EA74026E726554dB657fA54763abd0C3a0aa9);
+        allowedAddresses[0].add(0x53b7a2bF95cB4f00c98b115d13c6B6D1483472E3);
+        allowedAddresses[0].add(0x976EA74026E726554dB657fA54763abd0C3a0aa9);
+        allowedAddresses[1].add(0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65);
     }
 
     // --------------------------------------------------------------------------
     // For maintain
     // --------------------------------------------------------------------------
-    function addAllowed(address allowd) external override onlyEditor {
-        _allowedAddresses.add(allowd);
+    function addAllowed(address _allowd,uint256 _level) external override onlyEditor {
+        allowedAddresses[_level].add(_allowd);
     }
 
-    function removeAllowed(address allowd) external override onlyEditor {
-        _allowedAddresses.remove(allowd);
+    function removeAllowed(address _allowd,uint256 _level) external override onlyEditor {
+        allowedAddresses[_level].remove(_allowd);
     }
 
-    function getAllowedList() external view override returns(address[] memory){
-        return _allowedAddresses.values();
+    function getAllowedList(uint256 _level) external view override returns(address[] memory){
+        return allowedAddresses[_level].values();
     }
 
     // --------------------------------------------------------------------------
     // For user
     // --------------------------------------------------------------------------
-    function isAllowed(address transferer)
+    function isAllowed(address _transferer,uint256 _level)
         external
         view
         override
         returns (bool)
     {
-        return _allowedAddresses.contains(transferer);
+        bool Allowed = false;
+        for(uint256 i=0; i < _level + 1; i++){
+            if(allowedAddresses[_level].contains(_transferer) == true){
+                Allowed = true;
+                break;
+            }
+        }
+        return Allowed;
     }
 }

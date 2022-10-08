@@ -5,16 +5,16 @@ interface IContractAllowList {
     // --------------------------------------------------------------------------
     // For maintain
     // --------------------------------------------------------------------------
-    function addAllowed(address allowd) external;
+    function addAllowed(address allowd,uint256 level) external;
     
-    function removeAllowed(address allowd) external;
+    function removeAllowed(address allowd,uint256 level) external;
 
-    function getAllowedList() external view returns(address[] memory);
+    function getAllowedList(uint256 level) external view returns(address[] memory);
 
     // --------------------------------------------------------------------------
     // For user
     // --------------------------------------------------------------------------
-    function isAllowed(address transferer)
+    function isAllowed(address transferer,uint256 level)
         external
         view
         returns (bool);

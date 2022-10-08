@@ -15,7 +15,7 @@ contract ContractAllowListProxy is Ownable {
         ICALcore = IContractAllowList(_address);
     }
 
-    function isAllowed(address _address) external view returns(bool){
-        return ICALcore.isAllowed(_address);
+    function isAllowed(address _transferer,uint256 _level) external view returns(bool){
+        return ICALcore.isAllowed(_transferer,_level);
     }
 }
