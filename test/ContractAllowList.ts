@@ -53,6 +53,15 @@ describe("ContractAllowList", function () {
     })
   })
 
+  describe("getAllowedList", () => {
+    it("許可リストが取得できること", async () => {
+      const { contractAllowList, account } = await loadFixture(fixture)
+      var address = await contractAllowList.connect(account).getAllowedList();
+      expect(address[0]).to.equal("0x53b7a2bF95cB4f00c98b115d13c6B6D1483472E3");
+      expect(address[1]).to.equal("0x976EA74026E726554dB657fA54763abd0C3a0aa9");
+    })
+  })
+
   describe("setApprovalAll", () => {
     it("認可対象は成功すること", async () => {
       const { testNFT, account } = await loadFixture(fixture)

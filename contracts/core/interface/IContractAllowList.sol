@@ -9,6 +9,8 @@ interface IContractAllowList {
     
     function removeAllowed(address allowd) external;
 
+    function getAllowedList() external view returns(address[] memory);
+
     // --------------------------------------------------------------------------
     // For user
     // --------------------------------------------------------------------------

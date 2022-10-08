@@ -34,7 +34,9 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
         _setRoleAdmin(ALLOW_LIST_EDITOR, ALLOW_LIST_EDITOR);
         _setupRole(ALLOW_LIST_EDITOR, governor);
 
+        // For Test
         _allowedAddresses.add(0x53b7a2bF95cB4f00c98b115d13c6B6D1483472E3);
+        _allowedAddresses.add(0x976EA74026E726554dB657fA54763abd0C3a0aa9);
     }
 
     // --------------------------------------------------------------------------
@@ -46,6 +48,10 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
 
     function removeAllowed(address allowd) external override onlyEditor {
         _allowedAddresses.remove(allowd);
+    }
+
+    function getAllowedList() external view override returns(address[] memory){
+        return _allowedAddresses.values();
     }
 
     // --------------------------------------------------------------------------
