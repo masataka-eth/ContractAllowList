@@ -3,6 +3,11 @@ import { expect } from "chai";
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
+const allowedAddressesLv0 = ['0x976EA74026E726554dB657fA54763abd0C3a0aa9', '0xe030EaDA1e2734356C4e170dCB8DA86B1F399482']
+  .map(address => ethers.utils.getAddress(address))
+const allowedAddressesLv1 = ['0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65']
+  .map(address => ethers.utils.getAddress(address))
+
 const deploy = async (owner: Signer) => {
   const CALVoteToken = await ethers.getContractFactory("CALVoteToken")
   const calVoteToken = await CALVoteToken.deploy()
@@ -17,7 +22,8 @@ const deploy = async (owner: Signer) => {
   await calGoverner.deployed()
 
   const ContractAllowList = await ethers.getContractFactory("ContractAllowList")
-  const contractAllowList = await ContractAllowList.deploy(calGoverner.address)
+  // Contian owner for test
+  const contractAllowList = await ContractAllowList.deploy([calGoverner.address, owner.getAddress()])
   await contractAllowList.deployed()
 
   const ContractAllowListProxy = await ethers.getContractFactory("ContractAllowListProxy")
@@ -27,6 +33,14 @@ const deploy = async (owner: Signer) => {
   timelock.grantRole(await timelock.EXECUTOR_ROLE(), calGoverner.address)
   timelock.grantRole(await timelock.PROPOSER_ROLE(), calGoverner.address)
   timelock.grantRole(await timelock.CANCELLER_ROLE(), calGoverner.address)
+
+  for(const allowed of allowedAddressesLv0){
+    await contractAllowList.connect(owner).addAllowed(allowed, 0);
+  }
+  
+  for(const allowed of allowedAddressesLv1){
+    await contractAllowList.connect(owner).addAllowed(allowed, 1);
+  }
 
   const TestNFTcollection = await ethers.getContractFactory("TestNFTcollection")
   const testNFT = await TestNFTcollection.connect(owner).deploy()
@@ -49,7 +63,7 @@ describe("ContractAllowList", function () {
 
   describe("deploy", () => {
     it("各コントラクトがデプロイできること", async () => {
-      const { calVoteToken, timelock, calGoverner, contractAllowList, contractAllowListProxy } 
+      const { calVoteToken, timelock, calGoverner, contractAllowList, contractAllowListProxy }
         = await loadFixture(fixture)
       console.log("CALVoteToken", calVoteToken.address)
       console.log("Timelock", timelock.address)
@@ -62,42 +76,38 @@ describe("ContractAllowList", function () {
   describe("getAllowedList", () => {
     it("許可リストが取得できること", async () => {
       const { contractAllowList, account } = await loadFixture(fixture)
-      var address = await contractAllowList.connect(account).getAllowedList(0);
-      expect(address[0]).to.equal("0x53b7a2bF95cB4f00c98b115d13c6B6D1483472E3");
-      expect(address[1]).to.equal("0x976EA74026E726554dB657fA54763abd0C3a0aa9");
-
-      address = await contractAllowList.connect(account).getAllowedList(1);
-      expect(address[0]).to.equal("0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65");
+      expect(await contractAllowList.connect(account).getAllowedList(0)).to.deep.equals(allowedAddressesLv0)
+      expect(await contractAllowList.connect(account).getAllowedList(1)).to.deep.equals(allowedAddressesLv1)
     })
   })
 
   describe("setApprovalAll", () => {
-    it("認可対象は成功すること", async () => {
+    it("指定レベルの認可対象は成功すること", async () => {
       const { testNFT, account } = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await expect(testNFT.connect(account).setApprovalForAll(ethers.utils.getAddress("0x53b7a2bF95cB4f00c98b115d13c6B6D1483472E3"), true))
+      await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv0[0], true))
         .not.to.be.reverted
     })
-    
-    it("認可対象外は失敗すること", async () => {
+
+    it("全レベルの認可対象外は失敗すること", async () => {
       const { testNFT, account } = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
       await expect(testNFT.connect(account).setApprovalForAll(account.address, true))
         .to.be.reverted
     })
 
-    it("レベルに含まない認可対象外は失敗すること", async () => {
+    it("指定レベルに含まない認可対象外は失敗すること", async () => {
       const { testNFT, account } = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await expect(testNFT.connect(account).setApprovalForAll(("0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65"), true))
+      await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
         .to.be.reverted
     })
 
-    it("レベルに含めば成功すること", async () => {
-      const { testNFT, owner,account } = await loadFixture(fixture)
+    it("指定レベルをあげれば成功すること", async () => {
+      const { testNFT, owner, account } = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
       await testNFT.connect(owner).setContractAllowListLevel(1);
-      await expect(testNFT.connect(account).setApprovalForAll(("0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65"), true))
+      await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
         .not.to.be.reverted
     })
   })
