@@ -59,6 +59,9 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
         levelMustBeSequencial(_level)
     {
         allowedAddresses[_level].add(_allowd);
+        if(_level == maxLevel + 1){
+            maxLevel++;
+        }
     }
 
     function removeAllowed(address _allowd, uint256 _level)
@@ -68,6 +71,9 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
         exitsLevel(_level)
     {
         allowedAddresses[_level].remove(_allowd);
+        if(_level == maxLevel && EnumerableSet.length(allowedAddresses[_level]) == 0 && maxLevel > 0){
+            maxLevel--;
+        }
     }
 
     function getAllowedList(uint256 _level)
@@ -88,12 +94,13 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
         override
         returns (bool)
     {
-        if (_level == maxLevel) {
-            return allowedAddresses[_level].contains(_transferer);
-        } else {
-            return
-                allowedAddresses[_level].contains(_transferer) ||
-                isAllowed(_transferer, _level + 1);
+        bool Allowed = false;
+        for(uint256 i=0; i < _level + 1; i++){
+            if(allowedAddresses[_level].contains(_transferer) == true){
+                Allowed = true;
+                break;
+            }
         }
+        return Allowed;
     }
 }

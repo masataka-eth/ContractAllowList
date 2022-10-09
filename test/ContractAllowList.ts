@@ -81,6 +81,24 @@ describe("ContractAllowList", function () {
     })
   })
 
+  describe("addAllowed + removeAllowed", () => {
+    it("許可リストレベル超えた追加ができること", async () => {
+      const { contractAllowList, owner,account } = await loadFixture(fixture)
+      expect(await contractAllowList.connect(account).getAllowedList(0)).to.deep.equals(allowedAddressesLv0)
+      expect(await contractAllowList.connect(account).getAllowedList(1)).to.deep.equals(allowedAddressesLv1)
+      expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals([])
+      expect(await contractAllowList.connect(account).maxLevel()).to.equals(1);
+
+      await contractAllowList.connect(owner).addAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906",2);
+      expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals(["0x90F79bf6EB2c4f870365E785982E1f101E93b906"])
+      expect(await contractAllowList.connect(account).maxLevel()).to.equals(2);
+
+      await contractAllowList.connect(owner).removeAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906",2);
+      expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals([])
+      expect(await contractAllowList.connect(account).maxLevel()).to.equals(1);
+    })
+  })
+
   describe("setApprovalAll", () => {
     it("指定レベルの認可対象は成功すること", async () => {
       const { testNFT, account } = await loadFixture(fixture)
