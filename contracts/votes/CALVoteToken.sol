@@ -15,7 +15,7 @@ contract CALVoteToken is ERC721Votes {
     // Section modifier
     // ==========================================================================
     modifier onlyTokenOwner(uint256 tokenId) {
-        require(ownerOf(tokenId) == msg.sender, "You are not token owner.");
+        require(ownerOf(tokenId) == _msgSender(), "You are not token owner.");
         _;
     }
 
@@ -23,7 +23,7 @@ contract CALVoteToken is ERC721Votes {
     // Section external and public functions
     // ==========================================================================
     function mint() external {
-        _safeMint(msg.sender, _count);
+        _safeMint(_msgSender(), _count);
         _count++;
     }
 
