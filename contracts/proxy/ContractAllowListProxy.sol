@@ -2,16 +2,39 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "../core/interface/IContractAllowList.sol";
 
-contract ContractAllowListProxy is Ownable {
+contract ContractAllowListProxy is Ownable,AccessControlEnumerable {
+    // ==========================================================================
+    // Section constants
+    // ==========================================================================
+    bytes32 public constant ADMIN = keccak256("ADMIN");
+
+    // ==========================================================================
+    // Section variables
+    // ==========================================================================
     IContractAllowList public ICALcore;
 
+    // ==========================================================================
+    // Section modifier
+    // ==========================================================================
+    modifier onlyAdmin() {
+        require(hasRole(ADMIN, msg.sender), "You are not admin.");
+        _;
+    }
+
+    // ==========================================================================
+    // Section external and public functions
+    // ==========================================================================
     constructor(address _address) {
+        _setRoleAdmin(ADMIN, ADMIN);
+        _setupRole(ADMIN, msg.sender);
+
         ICALcore = IContractAllowList(_address);   
     } 
 
-    function setICALcore(address _address) external onlyOwner {
+    function setICALcore(address _address) external onlyAdmin {
         ICALcore = IContractAllowList(_address);
     }
 
