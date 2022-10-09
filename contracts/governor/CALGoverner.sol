@@ -57,7 +57,8 @@ contract CALGoverner is
         bytes[] memory calldatas,
         string memory description
     ) public override(Governor, IGovernor) returns (uint256) {
-        return super.propose(targets, values, calldatas, description);
+        uint256 proposalId = super.propose(targets, values, calldatas, description);
+        return proposalId;
     }
 
     function proposalThreshold() public view override(Governor, GovernorSettings) returns (uint256) {
