@@ -230,7 +230,7 @@ describe("ContractAllowList", function () {
       expect(await contractAllowList.getAllowedList(1)).not.to.be.contains(proposalTarget.address)
     })
 
-    it("認可対象の追加提案が期限切れになると（投票集まらず）、追加されないこと", async () => {
+    it("認可対象の追加提案3票集まり多数であれば、追加されること", async () => {
       const { calGoverner, calVoteToken, contractAllowList, owner, account, others } = await loadFixture(fixture)
       const [proposalTarget, voter1, voter2, voter3] = others
       const proposalCallData = contractAllowList.interface.encodeFunctionData('addAllowed', [proposalTarget.address, 1])
@@ -262,27 +262,73 @@ describe("ContractAllowList", function () {
       // wait deadline
       await mine(45836)
 
-      // PROPOSAL_STATE_EXPIREDになる想定！
-      expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_EXPIRED)
+      expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_SUCCEEDED)
 
-      //　試しに以下にしたら成功してしまった・・
-      // expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_SUCCEEDED)
-
-      // const descriptionHash = ethers.utils.id("Proposal #1: add allowed address to level1 list")
-      // await expect(calGoverner.connect(voter1).queue([contractAllowList.address], [0], [proposalCallData], descriptionHash))
-      //   .not.to.be.reverted
-      // expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_QUEUED)
+      const descriptionHash = ethers.utils.id("Proposal #1: add allowed address to level1 list")
+      await expect(calGoverner.connect(voter1).queue([contractAllowList.address], [0], [proposalCallData], descriptionHash))
+        .not.to.be.reverted
+      expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_QUEUED)
 
       
-      // await time.increase(45836)
+      await time.increase(45836)
       
-      // expect(await contractAllowList.getAllowedList(1)).not.to.be.contains(proposalTarget.address)
+      expect(await contractAllowList.getAllowedList(1)).not.to.be.contains(proposalTarget.address)
 
-      // await expect(calGoverner.connect(voter1).execute([contractAllowList.address], [0], [proposalCallData], descriptionHash))
-      //   .not.to.be.reverted
-      // expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_EXECUTED)
+      await expect(calGoverner.connect(voter1).execute([contractAllowList.address], [0], [proposalCallData], descriptionHash))
+        .not.to.be.reverted
+      expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_EXECUTED)
 
-      // expect(await contractAllowList.getAllowedList(1)).to.be.contains(proposalTarget.address)
+      expect(await contractAllowList.getAllowedList(1)).to.be.contains(proposalTarget.address)
+    })
+    it("認可対象の追加提案2票、反対1票でも3票集まってるので、追加されること", async () => {
+      const { calGoverner, calVoteToken, contractAllowList, owner, account, others } = await loadFixture(fixture)
+      const [proposalTarget, voter1, voter2, voter3] = others
+      const proposalCallData = contractAllowList.interface.encodeFunctionData('addAllowed', [proposalTarget.address, 1])
+
+      for (const voter of [voter1, voter2, voter3]) {
+        // delegateをしておかないと投票力が0になる。
+        await calVoteToken.connect(voter).delegate(voter.address)
+        await calVoteToken.connect(voter).mint()
+      }
+
+      const proposalTx = await calGoverner.connect(voter1).propose([contractAllowList.address], [0], [proposalCallData], "Proposal #1: add allowed address to level1 list")
+      const receipt = await proposalTx.wait()
+
+      const eventOfProposalCreated = receipt.events?.filter(r => r.event == "ProposalCreated").at(0)?.args!
+      const proposalId = eventOfProposalCreated[0]
+
+      expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_PENDING)
+
+      // wait voting delay
+      await mine(1)
+
+      for (const voter of [voter1, voter2]) {
+        await expect(calGoverner.connect(voter).castVote(proposalId, VOTE_FOR)).not.to.be.reverted
+      }
+      await expect(calGoverner.connect(voter3).castVote(proposalId, VOTE_AGAINST)).not.to.be.reverted
+
+      expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_ACTIVE)
+
+      // wait deadline
+      await mine(45836)
+
+      expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_SUCCEEDED)
+
+      const descriptionHash = ethers.utils.id("Proposal #1: add allowed address to level1 list")
+      await expect(calGoverner.connect(voter1).queue([contractAllowList.address], [0], [proposalCallData], descriptionHash))
+        .not.to.be.reverted
+      expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_QUEUED)
+
+      
+      await time.increase(45836)
+      
+      expect(await contractAllowList.getAllowedList(1)).not.to.be.contains(proposalTarget.address)
+
+      await expect(calGoverner.connect(voter1).execute([contractAllowList.address], [0], [proposalCallData], descriptionHash))
+        .not.to.be.reverted
+      expect(await calGoverner.state(proposalId)).to.equals(PROPOSAL_STATE_EXECUTED)
+
+      expect(await contractAllowList.getAllowedList(1)).to.be.contains(proposalTarget.address)
     })
   })
 })
