@@ -46,9 +46,9 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
             return true;
         } else if (status == LockStatus.CalLock) {
             if (CAL.isAllowed(to, CALLevel)) {
-                return true;
-            } else {
                 return false;
+            } else {
+                return true;
             }
         } else {
             revert("LockStatus is invalid");
