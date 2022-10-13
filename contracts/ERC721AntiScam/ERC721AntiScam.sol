@@ -80,12 +80,26 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         uint256 startTokenId,
         uint256 /*quantity*/
     ) internal virtual override {
-        // if it is a Transfer or Burn, we always deal with one token, that is startTokenId
+        // 転送やバーンにおいては、常にstartTokenIdは TokenIDそのものとなります。
         if (from != address(0)) {
-            // token should not be locked or msg.sender should be unlocker to do that
+            // トークンがロックされている場合、転送を許可しない
             require(getLocked(to, startTokenId) == false , "LOCKED");
         }
     }
+
+    function _afterTokenTransfers(
+        address from,
+        address /*to*/,
+        uint256 startTokenId,
+        uint256 /*quantity*/
+    ) internal virtual override {
+        // 転送やバーンにおいては、常にstartTokenIdは TokenIDそのものとなります。
+        if (from != address(0)) {
+            // ロックをデフォルトに戻す。（デフォルトは、 contractのLock status）
+            delete _lockStatus[startTokenId];
+        }
+    }
+
 
     function supportsInterface(bytes4 interfaceId)
         public
