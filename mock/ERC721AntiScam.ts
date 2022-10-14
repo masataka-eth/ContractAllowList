@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { allowedAddressesLv0, allowedAddressesLv1, deploy } from "./deploy";
 
 
-describe("ContractAllowList", function () {
+describe("ERC721AntiScam", function () {
   const fixture = async () => {
     const [owner, admin, account, ...others] = await ethers.getSigners()
     const contracts = await deploy(owner)
