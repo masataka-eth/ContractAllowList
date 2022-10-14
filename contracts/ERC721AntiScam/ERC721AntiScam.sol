@@ -40,6 +40,10 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
             status = _lockStatus[tokenId];
         }
 
+        return _getLocked(to, status);
+    }
+    
+    function _getLocked(address to, LockStatus status) internal virtual view returns(bool){
         if (status == LockStatus.UnLock) {
             return false;
         } else if (status == LockStatus.AllLock)  {
@@ -68,6 +72,18 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     /*///////////////////////////////////////////////////////////////
                               OVERRIDES
     //////////////////////////////////////////////////////////////*/
+
+    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
+        if(_getLocked(operator, contractLockStatus)){
+            return false;
+        }
+        return super.isApprovedForAll(owner, operator);
+    }
+
+    function setApprovalForAll(address operator, bool approved) public virtual override {
+        require (_getLocked(operator, contractLockStatus) == false || approved == false, "Can not approve locked token");
+        super.setApprovalForAll(operator, approved);
+    }
 
     function approve(address to, uint256 tokenId) public payable virtual override {
         require (getLocked(to, tokenId) == false, "Can not approve locked token");
