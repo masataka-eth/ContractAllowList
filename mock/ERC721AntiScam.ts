@@ -34,8 +34,7 @@ describe("ERC721AntiScam", function () {
       await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv0[0], true))
         .not.to.be.reverted
 
-      // TODO いまはエラーになる
-      // await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 0)).not.to.be.reverted
+      await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 0)).not.to.be.reverted
     })
 
     it("全レベルの認可対象外は失敗すること", async () => {
@@ -58,6 +57,7 @@ describe("ERC721AntiScam", function () {
       await testNFT.connect(owner).setContractAllowListLevel(1);
       await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
         .not.to.be.reverted
+      await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 0)).not.to.be.reverted
     })
   })
 
@@ -109,6 +109,7 @@ describe("ERC721AntiScam", function () {
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
       await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
         .not.to.be.reverted
+      await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 0)).not.to.be.reverted
 
 
       // LockStatusをCalLockに設定するとLocalAllowListに設定されていなければエラー
@@ -123,8 +124,10 @@ describe("ERC721AntiScam", function () {
       await expect(testNFT.connect(owner).addLocalContractAllowList(allowedAddressesLv0[0]))
         .not.to.be.reverted
 
+      await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
       await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv0[0], true))
         .not.to.be.reverted
+      await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 2)).not.to.be.reverted
 
       // LockStatusがCalLockの状態でLocalAllowListから削除すると再びエラー
       await expect(testNFT.connect(owner).removeLocalContractAllowList(allowedAddressesLv0[0]))

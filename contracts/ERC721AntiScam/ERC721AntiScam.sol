@@ -37,16 +37,22 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         _lockStatus[id] = level;
     }
 
-    function getLocked(address to, uint256 tokenId) public virtual view returns(bool) {
+    function getLocked(address to, uint256 tokenId) public virtual view returns(bool isLocked) {
         LockStatus status = contractLockStatus;
         if (uint(_lockStatus[tokenId]) >= 1) {
             status = _lockStatus[tokenId];
         }
 
-        return _getLocked(to, status);
+        if (status == LockStatus.CalLock) {
+            if (ownerOf(tokenId) == msg.sender) {
+                return false;
+            }
+        } else {
+            return _getLocked(to, status);
+        }
     }
     
-    function _getLocked(address to, LockStatus status) internal virtual view returns(bool){
+    function _getLocked(address to, LockStatus status) internal virtual view returns(bool isLocked){
         if (status == LockStatus.UnLock) {
             return false;
         } else if (status == LockStatus.AllLock)  {
