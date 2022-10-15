@@ -31,9 +31,14 @@ interface IERC721AntiScam {
 
 
     /**
-     * @dev CALのリストに無い独自の許可アドレスを設定する場合、こちらに許可アドレスを記載する。
+     * @dev CALのリストに無い独自の許可アドレスを追加する場合、こちらにアドレスを記載する。
      */
-    function setLocalContractAllowList(address _contract, bool _state) external;
+    function addLocalContractAllowList(address _contract) external;
+
+    /**
+     * @dev CALのリストにある独自の許可アドレスを削除する場合、こちらにアドレスを記載する。
+     */
+    function removeLocalContractAllowList(address _contract) external;
 
 
     /**

@@ -4,14 +4,17 @@ pragma solidity >=0.8.0;
 import "erc721a/contracts/ERC721A.sol";
 import './IERC721AntiScam.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "../proxy/interface/IContractAllowListProxy.sol";
 
 /// @title AntiScam機能付きERC721A
 /// @dev Readmeを見てください。
 
 abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-    IContractAllowListProxy CAL;
+    IContractAllowListProxy public CAL;
+    EnumerableSet.AddressSet localAllowedAddresses;
 
     /*//////////////////////////////////////////////////////////////
     ロック変数。トークンごとに個別ロック設定を行う
@@ -49,6 +52,12 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         } else if (status == LockStatus.AllLock)  {
             return true;
         } else if (status == LockStatus.CalLock) {
+            if (isLocalAllowed(to)) {
+                return false;
+            }
+            if (address(CAL) == address(0)) {
+                return true;
+            }
             if (CAL.isAllowed(to, CALLevel)) {
                 return false;
             } else {
@@ -59,6 +68,26 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         }
     }
 
+    function addLocalContractAllowList(address _contract) external onlyOwner {
+        localAllowedAddresses.add(_contract);
+    }
+
+    function removeLocalContractAllowList(address _contract) external onlyOwner {
+        localAllowedAddresses.remove(_contract);
+    }
+
+    function isLocalAllowed(address _transferer)
+        public
+        view
+        returns (bool)
+    {
+        bool Allowed = false;
+        if(localAllowedAddresses.contains(_transferer) == true){
+            Allowed = true;
+        }
+        return Allowed;
+    }
+
     function setContractAllowListLevel(uint256 level) external onlyOwner{
         CALLevel = level;
     }
@@ -66,6 +95,10 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     function setContractLockStatus(LockStatus _status) external onlyOwner {
        require(_status != LockStatus.UnSet, "AntiScam: contract lock status can not set UNSET");
        contractLockStatus = _status;
+    }
+
+    function setCAL(address _cal) external onlyOwner {
+        CAL = IContractAllowListProxy(_cal);
     }
 
 
