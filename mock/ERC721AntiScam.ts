@@ -1,4 +1,3 @@
-import { addressToBuffer } from "@nomicfoundation/ethereumjs-evm/dist/opcodes";
 import { loadFixture, time, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
