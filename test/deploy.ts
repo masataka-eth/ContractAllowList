@@ -1,10 +1,10 @@
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
-export const allowedAddressesLv0 = ['0x976EA74026E726554dB657fA54763abd0C3a0aa9', '0xe030EaDA1e2734356C4e170dCB8DA86B1F399482']
+export const allowedAddressesLv1 = ['0x976EA74026E726554dB657fA54763abd0C3a0aa9', '0xe030EaDA1e2734356C4e170dCB8DA86B1F399482']
   .map(address => ethers.utils.getAddress(address))
 
-export const allowedAddressesLv1 = ['0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65']
+export const allowedAddressesLv2 = ['0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65']
   .map(address => ethers.utils.getAddress(address))
 
 
@@ -34,12 +34,12 @@ export const deploy = async (owner: Signer) => {
   timelock.grantRole(await timelock.PROPOSER_ROLE(), calGoverner.address)
   timelock.grantRole(await timelock.CANCELLER_ROLE(), calGoverner.address)
 
-  for (const allowed of allowedAddressesLv0) {
-    await contractAllowList.connect(owner).addAllowed(allowed, 0);
-  }
-
   for (const allowed of allowedAddressesLv1) {
     await contractAllowList.connect(owner).addAllowed(allowed, 1);
+  }
+
+  for (const allowed of allowedAddressesLv2) {
+    await contractAllowList.connect(owner).addAllowed(allowed, 2);
   }
 
   const TestNFTcollection = await ethers.getContractFactory("TestNFTcollection")
