@@ -62,6 +62,7 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
         if(_level == maxLevel + 1){
             maxLevel++;
         }
+        emit ChangeAllowList(_allowd,_level,true);
     }
 
     function removeAllowed(address _allowd, uint256 _level)
@@ -74,6 +75,7 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
         if(_level == maxLevel && EnumerableSet.length(allowedAddresses[_level]) == 0 && maxLevel > 0){
             maxLevel--;
         }
+        emit ChangeAllowList(_allowd,_level,false);
     }
 
     function getAllowedList(uint256 _level)
@@ -94,8 +96,12 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
         override
         returns (bool)
     {
+        if(_level == 0){
+            return false;   // all ban
+        }
+
         bool Allowed = false;
-        for(uint256 i=0; i < _level + 1; i++){
+        for(uint256 i = 1; i < _level + 1; i++){
             if(allowedAddresses[_level].contains(_transferer) == true){
                 Allowed = true;
                 break;

@@ -10,9 +10,6 @@ const config: HardhatUserConfig = {
       }
     }
   },
-  paths: {
-    tests: "./mock",
-  },
 };
 
 export default config;

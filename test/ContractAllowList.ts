@@ -1,7 +1,7 @@
 import { loadFixture, time, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { allowedAddressesLv0, allowedAddressesLv1, deploy } from "./deploy";
+import { allowedAddressesLv1, allowedAddressesLv2, deploy } from "./deploy";
 
 
 describe("ContractAllowList", function () {
@@ -27,26 +27,30 @@ describe("ContractAllowList", function () {
   describe("getAllowedList", () => {
     it("許可リストが取得できること", async () => {
       const { contractAllowList, account } = await loadFixture(fixture)
-      expect(await contractAllowList.connect(account).getAllowedList(0)).to.deep.equals(allowedAddressesLv0)
       expect(await contractAllowList.connect(account).getAllowedList(1)).to.deep.equals(allowedAddressesLv1)
+      expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals(allowedAddressesLv2)
     })
   })
 
   describe("addAllowed + removeAllowed", () => {
     it("許可リストレベル超えた追加ができること", async () => {
       const { contractAllowList, owner, account } = await loadFixture(fixture)
-      expect(await contractAllowList.connect(account).getAllowedList(0)).to.deep.equals(allowedAddressesLv0)
       expect(await contractAllowList.connect(account).getAllowedList(1)).to.deep.equals(allowedAddressesLv1)
-      expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals([])
-      expect(await contractAllowList.connect(account).maxLevel()).to.equals(1);
-
-      await contractAllowList.connect(owner).addAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906", 2);
-      expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals(["0x90F79bf6EB2c4f870365E785982E1f101E93b906"])
+      expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals(allowedAddressesLv2)
+      expect(await contractAllowList.connect(account).getAllowedList(3)).to.deep.equals([])
       expect(await contractAllowList.connect(account).maxLevel()).to.equals(2);
 
-      await contractAllowList.connect(owner).removeAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906", 2);
-      expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals([])
-      expect(await contractAllowList.connect(account).maxLevel()).to.equals(1);
+      await expect(contractAllowList.connect(owner).addAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906", 3))
+        .to.emit(contractAllowList, `ChangeAllowList`)
+        .withArgs("0x90F79bf6EB2c4f870365E785982E1f101E93b906",3,true);
+      expect(await contractAllowList.connect(account).getAllowedList(3)).to.deep.equals(["0x90F79bf6EB2c4f870365E785982E1f101E93b906"])
+      expect(await contractAllowList.connect(account).maxLevel()).to.equals(3);
+
+      await expect(contractAllowList.connect(owner).removeAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906", 3))
+        .to.emit(contractAllowList, `ChangeAllowList`)
+        .withArgs("0x90F79bf6EB2c4f870365E785982E1f101E93b906",3,false);
+      expect(await contractAllowList.connect(account).getAllowedList(3)).to.deep.equals([])
+      expect(await contractAllowList.connect(account).maxLevel()).to.equals(2);
     })
   })
 
