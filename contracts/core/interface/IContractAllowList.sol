@@ -11,6 +11,8 @@ interface IContractAllowList {
 
     function getAllowedList(uint256 level) external view returns(address[] memory);
 
+    event ChangeAllowList(address target, uint256 level, bool allowd);
+
     // --------------------------------------------------------------------------
     // For user
     // --------------------------------------------------------------------------

@@ -40,11 +40,15 @@ describe("ContractAllowList", function () {
       expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals([])
       expect(await contractAllowList.connect(account).maxLevel()).to.equals(1);
 
-      await contractAllowList.connect(owner).addAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906", 2);
+      await expect(contractAllowList.connect(owner).addAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906", 2))
+        .to.emit(contractAllowList, `ChangeAllowList`)
+        .withArgs("0x90F79bf6EB2c4f870365E785982E1f101E93b906",2,true);
       expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals(["0x90F79bf6EB2c4f870365E785982E1f101E93b906"])
       expect(await contractAllowList.connect(account).maxLevel()).to.equals(2);
 
-      await contractAllowList.connect(owner).removeAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906", 2);
+      await expect(contractAllowList.connect(owner).removeAllowed("0x90F79bf6EB2c4f870365E785982E1f101E93b906", 2))
+        .to.emit(contractAllowList, `ChangeAllowList`)
+        .withArgs("0x90F79bf6EB2c4f870365E785982E1f101E93b906",2,false);
       expect(await contractAllowList.connect(account).getAllowedList(2)).to.deep.equals([])
       expect(await contractAllowList.connect(account).maxLevel()).to.equals(1);
     })
