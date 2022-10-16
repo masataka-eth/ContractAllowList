@@ -27,8 +27,22 @@ interface IERC721AntiScam {
     /**
      * @dev 該当トークンIDにおいて、該当コントラクトの転送が許可されているかを返す
      */
-    function getLocked(address to ,uint256 tokenId) external view returns (bool);
+    function getTokenLocked(address to ,uint256 tokenId) external view returns (bool);
 
+    /**
+     * @dev 該当ウォレットアドレスにおいて、該当コントラクトの転送が許可されているかを返す
+     */
+    function getLocked(address to ,address holder) external view returns (bool);
+
+    /**
+     * @dev トークン所有者のウォレットアドレスにおけるロックステータスを変更する
+     */
+    function setWalletLock(LockStatus status) external;
+
+    /**
+     * @dev トークン所有者のウォレットアドレスにおけるCALレベルを変更する
+     */
+    function setWalletCALLevel(uint256 level) external;
 
     /**
      * @dev CALのリストに無い独自の許可アドレスを設定する場合、こちらに許可アドレスを記載する。
