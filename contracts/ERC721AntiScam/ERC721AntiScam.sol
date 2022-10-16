@@ -17,7 +17,15 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     ロック変数。トークンごとに個別ロック設定を行う
     //////////////////////////////////////////////////////////////*/
 
-    mapping(uint256 => LockStatus) internal _lockStatus;
+    // token lock
+    mapping(uint256 => LockStatus) internal _tokenLockStatus;
+    mapping(uint256 => uint256) internal _tokenCALLevel;
+    
+    // wallet lock
+    mapping(address => LockStatus) internal _walletLockStatus;
+    mapping(address => uint256) internal _walletCALLevel;
+
+    // contract lock
     LockStatus public contractLockStatus = LockStatus.CalLock;
     uint256 public CALLevel = 1;
 
@@ -27,29 +35,29 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
 
     function getLockStatus(uint256 tokenId) public virtual view returns (LockStatus) {
         require(_exists(tokenId), "AntiScam: locking query for nonexistent token");
-        return _lockStatus[tokenId];
+        return _getLockStatus(ownerOf(tokenId), tokenId);
     }
 
-    function lock(LockStatus level, uint256 id) external virtual onlyOwner {
-        _lockStatus[id] = level;
+    function getTokenLocked(address operator, uint256 tokenId) public virtual view returns(bool) {
+        address holder = ownerOf(tokenId);
+        LockStatus status = _getLockStatus(holder, tokenId);
+        uint256 level = _getCALLevel(holder, tokenId);
+        return _getLocked(operator, status, level);
     }
 
-    function getLocked(address to, uint256 tokenId) public virtual view returns(bool) {
-        LockStatus status = contractLockStatus;
-        if (uint(_lockStatus[tokenId]) >= 1) {
-            status = _lockStatus[tokenId];
-        }
-
-        return _getLocked(to, status);
+    function getLocked(address operator, address holder) public virtual view returns(bool) {
+        LockStatus status = _getLockStatus(holder);
+        uint256 level = _getCALLevel(holder);
+        return _getLocked(operator, status, level);
     }
     
-    function _getLocked(address to, LockStatus status) internal virtual view returns(bool){
+    function _getLocked(address operator, LockStatus status, uint256 level) internal virtual view returns(bool){
         if (status == LockStatus.UnLock) {
             return false;
         } else if (status == LockStatus.AllLock)  {
             return true;
         } else if (status == LockStatus.CalLock) {
-            if (CAL.isAllowed(to, CALLevel)) {
+            if (CAL.isAllowed(operator, level)) {
                 return false;
             } else {
                 return true;
@@ -59,6 +67,53 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         }
     }
 
+    function _getLockStatus(address holder, uint256 tokenId) internal virtual view returns(LockStatus){
+        if(_tokenLockStatus[tokenId] != LockStatus.UnSet) {
+            return _tokenLockStatus[tokenId];
+        }
+
+        return _getLockStatus(holder);
+    }
+    
+    function _getLockStatus(address holder) internal virtual view returns(LockStatus){
+        if(_walletLockStatus[holder] != LockStatus.UnSet) {
+            return _walletLockStatus[holder];
+        }
+
+        return contractLockStatus;
+    }
+
+    function _getCALLevel(address holder, uint256 tokenId) internal virtual view returns(uint256){
+        if(_tokenCALLevel[tokenId] > 0) {
+            return _tokenCALLevel[tokenId];
+        }
+
+        return _getCALLevel(holder);
+    }
+
+    function _getCALLevel(address holder) internal virtual view returns(uint256){
+        if(_walletCALLevel[holder] > 0) {
+            return _walletCALLevel[holder];
+        }
+
+        return CALLevel;
+    }
+
+    // For token lock
+    function lock(LockStatus _status, uint256 id) external virtual onlyOwner {
+        _tokenLockStatus[id] = _status;
+    }
+
+    // For wallet lock
+    function setWalletLock(LockStatus status) external virtual {
+        _walletLockStatus[msg.sender] = status;
+    }
+
+    function setWalletCALLevel(uint256 level) external virtual {
+        _walletCALLevel[msg.sender] = level;
+    }
+
+    // For contract lock 
     function setContractAllowListLevel(uint256 level) external onlyOwner{
         CALLevel = level;
     }
@@ -74,19 +129,19 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     //////////////////////////////////////////////////////////////*/
 
     function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
-        if(_getLocked(operator, contractLockStatus)){
+        if(getLocked(operator, owner)){
             return false;
         }
         return super.isApprovedForAll(owner, operator);
     }
 
     function setApprovalForAll(address operator, bool approved) public virtual override {
-        require (_getLocked(operator, contractLockStatus) == false || approved == false, "Can not approve locked token");
+        require (getLocked(operator, msg.sender) == false || approved == false, "Can not approve locked token");
         super.setApprovalForAll(operator, approved);
     }
 
     function approve(address to, uint256 tokenId) public payable virtual override {
-        require (getLocked(to, tokenId) == false, "Can not approve locked token");
+        require (getTokenLocked(to, tokenId) == false, "Can not approve locked token");
         super.approve(to, tokenId);
     }
 
@@ -99,7 +154,7 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         // 転送やバーンにおいては、常にstartTokenIdは TokenIDそのものとなります。
         if (from != address(0)) {
             // トークンがロックされている場合、転送を許可しない
-            require(getLocked(to, startTokenId) == false , "LOCKED");
+            require(getTokenLocked(to, startTokenId) == false , "LOCKED");
         }
     }
 
@@ -112,7 +167,7 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         // 転送やバーンにおいては、常にstartTokenIdは TokenIDそのものとなります。
         if (from != address(0)) {
             // ロックをデフォルトに戻す。（デフォルトは、 contractのLock status）
-            delete _lockStatus[startTokenId];
+            delete _tokenLockStatus[startTokenId];
         }
     }
 
