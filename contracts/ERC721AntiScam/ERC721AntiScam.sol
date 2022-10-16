@@ -168,6 +168,7 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         if (from != address(0)) {
             // ロックをデフォルトに戻す。（デフォルトは、 contractのLock status）
             delete _tokenLockStatus[startTokenId];
+            delete _tokenCALLevel[startTokenId];
         }
     }
 
