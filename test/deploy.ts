@@ -48,7 +48,11 @@ export const deploy = async (owner: Signer) => {
 
   await testNFT.connect(owner).setContractAllowListLevel(0)
 
-  return { calVoteToken, timelock, calGoverner, contractAllowList, contractAllowListProxy, testNFT }
+  const MarketDummy = await ethers.getContractFactory("MarketDummy")
+  const market = await MarketDummy.connect(owner).deploy()
+  await market.deployed()
+
+  return { calVoteToken, timelock, calGoverner, contractAllowList, contractAllowListProxy, testNFT, market }
 }
 
 export default deploy

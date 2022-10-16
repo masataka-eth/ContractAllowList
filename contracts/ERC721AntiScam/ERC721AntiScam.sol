@@ -4,14 +4,17 @@ pragma solidity >=0.8.0;
 import "erc721a/contracts/ERC721A.sol";
 import './IERC721AntiScam.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "../proxy/interface/IContractAllowListProxy.sol";
 
 /// @title AntiScam機能付きERC721A
 /// @dev Readmeを見てください。
 
 abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-    IContractAllowListProxy CAL;
+    IContractAllowListProxy public CAL;
+    EnumerableSet.AddressSet localAllowedAddresses;
 
     /*//////////////////////////////////////////////////////////////
     ロック変数。トークンごとに個別ロック設定を行う
@@ -38,11 +41,18 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         return _getLockStatus(ownerOf(tokenId), tokenId);
     }
 
-    function getTokenLocked(address operator, uint256 tokenId) public virtual view returns(bool) {
+    function getTokenLocked(address operator, uint256 tokenId) public virtual view returns(bool isLocked) {
         address holder = ownerOf(tokenId);
         LockStatus status = _getLockStatus(holder, tokenId);
         uint256 level = _getCALLevel(holder, tokenId);
-        return _getLocked(operator, status, level);
+
+        if (status == LockStatus.CalLock) {
+            if (ownerOf(tokenId) == msg.sender) {
+                return false;
+            }
+        } else {
+            return _getLocked(operator, status, level);
+        }
     }
 
     function getLocked(address operator, address holder) public virtual view returns(bool) {
@@ -50,13 +60,19 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         uint256 level = _getCALLevel(holder);
         return _getLocked(operator, status, level);
     }
-    
+
     function _getLocked(address operator, LockStatus status, uint256 level) internal virtual view returns(bool){
         if (status == LockStatus.UnLock) {
             return false;
         } else if (status == LockStatus.AllLock)  {
             return true;
         } else if (status == LockStatus.CalLock) {
+            if (isLocalAllowed(operator)) {
+                return false;
+            }
+            if (address(CAL) == address(0)) {
+                return true;
+            }
             if (CAL.isAllowed(operator, level)) {
                 return false;
             } else {
@@ -65,6 +81,26 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         } else {
             revert("LockStatus is invalid");
         }
+    }
+
+    function addLocalContractAllowList(address _contract) external onlyOwner {
+        localAllowedAddresses.add(_contract);
+    }
+
+    function removeLocalContractAllowList(address _contract) external onlyOwner {
+        localAllowedAddresses.remove(_contract);
+    }
+
+    function isLocalAllowed(address _transferer)
+        public
+        view
+        returns (bool)
+    {
+        bool Allowed = false;
+        if(localAllowedAddresses.contains(_transferer) == true){
+            Allowed = true;
+        }
+        return Allowed;
     }
 
     function _getLockStatus(address holder, uint256 tokenId) internal virtual view returns(LockStatus){
@@ -121,6 +157,10 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     function setContractLockStatus(LockStatus _status) external onlyOwner {
        require(_status != LockStatus.UnSet, "AntiScam: contract lock status can not set UNSET");
        contractLockStatus = _status;
+    }
+
+    function setCAL(address _cal) external onlyOwner {
+        CAL = IContractAllowListProxy(_cal);
     }
 
 

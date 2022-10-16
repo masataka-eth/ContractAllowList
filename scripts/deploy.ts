@@ -14,7 +14,7 @@ async function main() {
   await calGoverner.deployed()
 
   const ContractAllowList = await ethers.getContractFactory("ContractAllowList")
-  const contractAllowList = await ContractAllowList.deploy(calGoverner.address)
+  const contractAllowList = await ContractAllowList.deploy([calGoverner.address])
   await contractAllowList.deployed()
 
   timelock.grantRole(await timelock.EXECUTOR_ROLE(), calGoverner.address)
