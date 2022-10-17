@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import './IERC721AntiScam.sol';
+import './LockAccessControl.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "../proxy/interface/IContractAllowListProxy.sol";
@@ -10,7 +11,7 @@ import "../proxy/interface/IContractAllowListProxy.sol";
 /// @title AntiScam機能付きERC721A
 /// @dev Readmeを見てください。
 
-abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
+abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable, LockAccessControl {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     IContractAllowListProxy public CAL;
@@ -23,7 +24,7 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     // token lock
     mapping(uint256 => LockStatus) internal _tokenLockStatus;
     mapping(uint256 => uint256) internal _tokenCALLevel;
-    
+
     // wallet lock
     mapping(address => LockStatus) internal _walletLockStatus;
     mapping(address => uint256) internal _walletCALLevel;
@@ -110,7 +111,7 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
 
         return _getLockStatus(holder);
     }
-    
+
     function _getLockStatus(address holder) internal virtual view returns(LockStatus){
         if(_walletLockStatus[holder] != LockStatus.UnSet) {
             return _walletLockStatus[holder];
@@ -136,7 +137,7 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     }
 
     // For token lock
-    function lock(LockStatus _status, uint256 id) external virtual onlyOwner {
+    function lock(LockStatus _status, uint256 id) external virtual onlyLocker {
         _tokenLockStatus[id] = _status;
     }
 
@@ -149,7 +150,7 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
         _walletCALLevel[msg.sender] = level;
     }
 
-    // For contract lock 
+    // For contract lock
     function setContractAllowListLevel(uint256 level) external onlyOwner{
         CALLevel = level;
     }
