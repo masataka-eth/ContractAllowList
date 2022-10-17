@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.7.0;
 
-import "../ERC721AntiScam/ERC721AntiScam.sol";
+import "../ERC721AntiScam/extensions/ERC721AntiScamControl.sol";
 
-contract MockERC721AntiScam is ERC721AntiScam {
-    constructor() ERC721A("MockERC721AntiScam", "MOCK") {
+contract MockERC721AntiScamControl is ERC721AntiScamControl {
+    constructor() ERC721A("MockERC721AntiScamControl", "MOCK") {
     }
 
     function mint(uint256 _mintAmount) public payable {

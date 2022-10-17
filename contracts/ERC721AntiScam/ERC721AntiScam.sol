@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import './IERC721AntiScam.sol';
-import './LockAccessControl.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "../proxy/interface/IContractAllowListProxy.sol";
@@ -11,7 +10,7 @@ import "../proxy/interface/IContractAllowListProxy.sol";
 /// @title AntiScam機能付きERC721A
 /// @dev Readmeを見てください。
 
-abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable, LockAccessControl {
+abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     IContractAllowListProxy public CAL;
@@ -137,17 +136,17 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable, LockAcces
     }
 
     // For token lock
-    function lock(LockStatus _status, uint256 id) external virtual onlyLocker {
-        _tokenLockStatus[id] = _status;
+    function _lock(LockStatus status, uint256 id) internal virtual {
+        _tokenLockStatus[id] = status;
     }
 
     // For wallet lock
-    function setWalletLock(LockStatus status) external virtual {
-        _walletLockStatus[msg.sender] = status;
+    function _setWalletLock(address to, LockStatus status) internal virtual {
+        _walletLockStatus[to] = status;
     }
 
-    function setWalletCALLevel(uint256 level) external virtual {
-        _walletCALLevel[msg.sender] = level;
+    function _setWalletCALLevel(address to ,uint256 level) internal virtual {
+        _walletCALLevel[to] = level;
     }
 
     // For contract lock
@@ -155,15 +154,14 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable, LockAcces
         CALLevel = level;
     }
 
-    function setContractLockStatus(LockStatus _status) external onlyOwner {
-       require(_status != LockStatus.UnSet, "AntiScam: contract lock status can not set UNSET");
-       contractLockStatus = _status;
+    function setContractLockStatus(LockStatus status) external onlyOwner {
+       require(status != LockStatus.UnSet, "AntiScam: contract lock status can not set UNSET");
+       contractLockStatus = status;
     }
 
     function setCAL(address _cal) external onlyOwner {
         CAL = IContractAllowListProxy(_cal);
     }
-
 
     /*///////////////////////////////////////////////////////////////
                               OVERRIDES

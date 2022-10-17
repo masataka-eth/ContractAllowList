@@ -1,7 +1,7 @@
 import { ethers } from "hardhat"
 
 async function main() {
-  const ERC721AntiScam = await ethers.getContractFactory("MockERC721AntiScam")
+  const ERC721AntiScam = await ethers.getContractFactory("MockERC721AntiScamControl")
 
   console.log('Deploying ERC721AntiScam token...')
   const token = await ERC721AntiScam.deploy()

@@ -35,16 +35,6 @@ interface IERC721AntiScam {
     function getLocked(address to ,address holder) external view returns (bool);
 
     /**
-     * @dev トークン所有者のウォレットアドレスにおけるロックステータスを変更する
-     */
-    function setWalletLock(LockStatus status) external;
-
-    /**
-     * @dev トークン所有者のウォレットアドレスにおけるCALレベルを変更する
-     */
-    function setWalletCALLevel(uint256 level) external;
-
-    /**
      * @dev CALのリストに無い独自の許可アドレスを追加する場合、こちらにアドレスを記載する。
      */
     function addLocalContractAllowList(address _contract) external;
