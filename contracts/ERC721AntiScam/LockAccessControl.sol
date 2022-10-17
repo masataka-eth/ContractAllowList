@@ -13,12 +13,12 @@ abstract contract LockAccessControl  {
         return _operators[_operator];
     }
 
-    function _grantOperatorRole(address _candidate) internal {
+    function _grantLockerRole(address _candidate) internal {
         require(!_operators[_candidate],'account is already has an operator role');
         _operators[_candidate] = true;
     }
 
-    function _revokeOperatorRole(address _candidate) internal {
+    function _revokeLockerRole(address _candidate) internal {
         _checkLockerRole(_candidate);
         delete _operators[_candidate];
     }
