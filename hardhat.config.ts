@@ -29,26 +29,6 @@ const config: HardhatUserConfig = {
         mnemonic: 'test test test test test test test test test test test junk',
       },
     },
-    goerli: {
-      url: process.env['GOERLI_RPC'] || '',
-      chainId: 5,
-      accounts: [process.env["PRIVATE_KEY"] || ""],
-    },
-    ethereum: {
-      url: process.env['ETHEREUM_RPC'] || '',
-      chainId: 1,
-      accounts: [process.env["PRIVATE_KEY"] || ""],
-    },
-    polygon: {
-      url: process.env['POLYGON_RPC'] || '',
-      chainId: 137,
-      accounts: [process.env["PRIVATE_KEY"] || ""],
-    },
-    mumbai: {
-      url: process.env['MUMBAI_RPC'] || '',
-      chainId: 80001,
-      accounts: [process.env["PRIVATE_KEY"] || ""],
-    },
   }
 };
 
