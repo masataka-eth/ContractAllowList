@@ -1,6 +1,8 @@
 import 'dotenv/config'
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import { config as dotenvConfig } from "dotenv";
+import "@nomiclabs/hardhat-etherscan";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -28,6 +30,14 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: 'test test test test test test test test test test test junk',
       },
+    },
+    goerli: {
+      url: "https://eth-goerli.g.alchemy.com/v2/" + process.env.ALCHEMY_KEY,
+      accounts: [`${process.env.PRIVATE_KEY}`],
+    },
+    mumbai: {
+      url: "https://polygon-mumbai.g.alchemy.com/v2/" + process.env.ALCHEMY_KEY,
+      accounts: [`${process.env.PRIVATE_KEY}`],
     },
   }
 };
