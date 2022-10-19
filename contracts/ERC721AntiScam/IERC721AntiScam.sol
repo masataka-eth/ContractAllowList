@@ -17,7 +17,7 @@ interface IERC721AntiScam {
     /**
      * @dev 個別ロックが指定された場合のイベント
      */
-    event Lock(uint256 indexed level, LockStatus indexed id);
+    event TokenLock(address indexed owner, address indexed from, uint lockStatus, uint256 indexed tokenId);
 
     /**
      * @dev 該当トークンIDにおけるロックレベルを return で返す。

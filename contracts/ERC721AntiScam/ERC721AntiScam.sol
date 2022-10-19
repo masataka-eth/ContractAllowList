@@ -158,6 +158,7 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     // For token lock
     function _lock(LockStatus status, uint256 id) internal virtual {
         _tokenLockStatus[id] = status;
+        emit TokenLock(ownerOf(id), msg.sender, uint(status), id);
     }
 
     // For wallet lock

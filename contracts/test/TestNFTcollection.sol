@@ -15,4 +15,14 @@ contract TestNFTcollection is ERC721AntiScam {
     function setLocalContractAllowList(address _contract, bool _state)
         external
     {}
+
+    function setLock(LockStatus status, uint256 tokenId) public {
+        require(ownerOf(tokenId) == msg.sender);
+        _lock(status, tokenId);
+    }
+
+    function setLockAdmin(LockStatus status, uint256 tokenId) public onlyOwner{
+        _lock(status, tokenId);
+    }
+
 }
