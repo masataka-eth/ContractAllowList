@@ -156,4 +156,22 @@ describe("ERC721AntiScam", function () {
 
 
   })
+
+  describe("Event", () => {
+    it("_lock実行時にEventが発行されること", async () => {
+      const { testNFT, owner, account } = await loadFixture(fixture)
+      await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
+
+      // 所有者によるロックイベント
+      await expect(testNFT.connect(account).setLock(1, 0))
+            .to.emit(testNFT, 'TokenLock')
+            .withArgs(account.address, account.address, 1, 0)
+
+      // 所有者以外によるロックイベント
+      await expect(testNFT.connect(owner).setLockAdmin(3, 0))
+            .to.emit(testNFT, 'TokenLock')
+            .withArgs(account.address, owner.address, 3, 0)        
+    })
+  })
+
 })
