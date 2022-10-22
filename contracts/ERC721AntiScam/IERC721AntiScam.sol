@@ -32,23 +32,23 @@ interface IERC721AntiScam {
     /**
      * @dev 該当コントラクトの転送が拒否されているトークンを全て返す
      */
-    function getTokensUnderLock(address to) external view returns (uint256);
+    function getTokensUnderLock(address to) external view returns (uint256[] memory);
 
     /**
      * @dev 該当コントラクトの転送が拒否されているstartからstopまでのトークンIDを返す
      */
-    function getTokensUnderLock(address to, uint256 start, uint256 end) external view returns (uint256);
+    function getTokensUnderLock(address to, uint256 start, uint256 end) external view returns (uint256[] memory);
 
     
     /**
      * @dev holderが所有するトークンのうち、該当コントラクトの転送が拒否されているトークンを全て返す
      */
-    function getTokensUnderLock(address holder, address to) external view returns (uint256);
+    function getTokensUnderLock(address holder, address to) external view returns (uint256[] memory);
 
     /**
      * @dev holderが所有するトークンのうち、該当コントラクトの転送が拒否されているstartからstopまでのトークンIDを返す
      */
-    function getTokensUnderLock(address holder, address to, uint256 start, uint256 end) external view returns (uint256);
+    function getTokensUnderLock(address holder, address to, uint256 start, uint256 end) external view returns (uint256[] memory);
 
     /**
      * @dev 該当ウォレットアドレスにおいて、該当コントラクトの転送が許可されているかを返す

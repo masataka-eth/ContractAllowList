@@ -75,7 +75,7 @@ describe("ERC721AntiScam", function () {
       await newTimelock.deployed()
 
       const NewContractAllowList = await ethers.getContractFactory("ContractAllowList")
-      // Contian owner for test
+      // Contain owner for test
       const newContractAllowList = await NewContractAllowList.deploy([newTimelock.address, owner.getAddress()])
       await newContractAllowList.deployed()
 
@@ -171,6 +171,33 @@ describe("ERC721AntiScam", function () {
       await expect(testNFT.connect(owner).setLockAdmin(3, 0))
             .to.emit(testNFT, 'TokenLock')
             .withArgs(account.address, owner.address, 3, 0)        
+    })
+  })
+
+  describe("Interface of getTokensUnderLock", () =>{
+    it("getTokensUnderLockが長さ0の配列を返すこと", async () => {
+      const { testNFT, owner, account } = await loadFixture(fixture)
+      await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
+
+      let res = await testNFT.connect(account)["getTokensUnderLock(address)"](account.address);
+      expect(res.length).to.be.equal(0)
+
+      res = await testNFT.connect(account)["getTokensUnderLock(address,address)"](account.address, account.address);
+      expect(res.length).to.be.equal(0)
+
+      res = await testNFT.connect(account)["getTokensUnderLock(address,uint256,uint256)"](
+        account.address, 
+        1,
+        10);
+      expect(res.length).to.be.equal(0)
+
+      res = await testNFT.connect(account)["getTokensUnderLock(address,address,uint256,uint256)"](
+        account.address, 
+        account.address,
+        1,
+        10);
+      expect(res.length).to.be.equal(0)
+
     })
   })
 
