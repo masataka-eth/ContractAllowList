@@ -56,23 +56,23 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     }
     
     // TODO 標準実装
-    function getTokensUnderLock(address to) external view returns (uint256){
-        return 0;
+    function getTokensUnderLock(address to) external view returns (uint256[] memory){
+        return new uint256[](0);
     }
 
     // TODO 標準実装
-    function getTokensUnderLock(address to, uint256 start, uint256 end) external view returns (uint256){
-        return 0;
+    function getTokensUnderLock(address to, uint256 start, uint256 end) external view returns (uint256[] memory){
+        return new uint256[](0);
     }
     
     // TODO 標準実装
-    function getTokensUnderLock(address holder, address to) external view returns (uint256){
-        return 0;
+    function getTokensUnderLock(address holder, address to) external view returns (uint256[] memory){
+        return new uint256[](0);
     }
 
     // TODO 標準実装
-    function getTokensUnderLock(address holder, address to, uint256 start, uint256 end) external view returns (uint256){
-        return 0;
+    function getTokensUnderLock(address holder, address to, uint256 start, uint256 end) external view returns (uint256[] memory){
+        return new uint256[](0);
     }
 
     function getLocked(address operator, address holder) public virtual view returns(bool) {
