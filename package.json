@@ -1,7 +1,8 @@
 {
   "name": "contract-allow-list",
   "version": "1.0.0",
-  "description": "transferを許可するコントラクトを管理する",
+  "description": "Project to protect NFT holders from scam.",
+  "license": "MIT",
   "scripts": {
     "test": "REPORT_GAS=true npx hardhat test"
   },
