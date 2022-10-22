@@ -75,7 +75,7 @@ describe("ERC721AntiScam", function () {
       await newTimelock.deployed()
 
       const NewContractAllowList = await ethers.getContractFactory("ContractAllowList")
-      // Contian owner for test
+      // Contain owner for test
       const newContractAllowList = await NewContractAllowList.deploy([newTimelock.address, owner.getAddress()])
       await newContractAllowList.deployed()
 
