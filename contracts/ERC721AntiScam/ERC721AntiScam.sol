@@ -201,7 +201,17 @@ abstract contract ERC721AntiScam is ERC721A, IERC721AntiScam, Ownable {
     }
 
     function approve(address to, uint256 tokenId) public payable virtual override {
-        require (getTokenLocked(to, tokenId) == false, "Can not approve locked token");
+        if(to != address(0)){
+            address holder = ownerOf(tokenId);
+            LockStatus status = _tokenLockStatus[tokenId];
+            require (status != LockStatus.AllLock, "Can not approve locked token");
+            if (status == LockStatus.CalLock){
+                uint256 level = _getCALLevel(holder, tokenId);
+                require (_getLocked(to, status, level) == false, "Can not approve locked token");
+            } else if (status == LockStatus.UnSet){
+                require (getLocked(to,holder) == false, "Can not approve locked token");
+            }
+        }
         super.approve(to, tokenId);
     }
 
