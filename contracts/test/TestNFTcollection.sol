@@ -25,4 +25,7 @@ contract TestNFTcollection is ERC721AntiScam {
         _lock(status, tokenId);
     }
 
+    function setWalletLock(LockStatus status) public {
+        _setWalletLock(msg.sender, status);
+    }
 }
