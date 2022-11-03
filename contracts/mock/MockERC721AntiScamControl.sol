@@ -4,8 +4,7 @@ pragma solidity >=0.7.0;
 import "../ERC721AntiScam/extensions/ERC721AntiScamControl.sol";
 
 contract MockERC721AntiScamControl is ERC721AntiScamControl {
-    constructor() ERC721A("MockERC721AntiScamControl", "MOCK") {
-    }
+    constructor() ERC721A("MockERC721AntiScamControl", "MOCK") {}
 
     function mint(uint256 _mintAmount) public payable {
         _safeMint(msg.sender, _mintAmount);
@@ -22,4 +21,23 @@ contract MockERC721AntiScamControl is ERC721AntiScamControl {
         _revokeLockerRole(_candidate);
     }
 
+    function addLocalContractAllowList(address transferer)
+        external
+        override
+        onlyOwner
+    {
+        _addLocalContractAllowList(transferer);
+    }
+
+    function removeLocalContractAllowList(address transferer)
+        external
+        override
+        onlyOwner
+    {
+        _removeLocalContractAllowList(transferer);
+    }
+
+    function setCalLevel(uint256 level) external override onlyOwner {
+        CALLevel = level;
+    }
 }

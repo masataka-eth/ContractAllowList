@@ -13,24 +13,31 @@ abstract contract ERC721AntiScamControl is IERC721AntiScamControl, ERC721AntiSca
     }
 
     /**
-     * @dev トークンレベルでのロックステータスを変更する
+     * @dev トークンレベルでロックする
      */
-    function lock(LockStatus status, uint256 id) external virtual onlyLocker {
-        _lock(status, id);
+    function lock(uint256[] calldata tokenIds) external virtual override onlyLocker {
+        _lock(tokenIds);
     }
 
     /**
-     * @dev トークン所有者のウォレットアドレスにおけるロックステータスを変更する
+     * @dev トークンレベルでのロックを解除する
      */
-    function setWalletLock(address to, LockStatus status) external virtual override onlyLocker {
-        _setWalletLock(to, status);
+    function unlock(uint256[] calldata tokenIds) external virtual override onlyLocker {
+        _unlock(tokenIds);
     }
 
     /**
-     * @dev トークン所有者のウォレットアドレスにおけるCALレベルを変更する
+     * @dev トークン所有者のウォレットアドレスをロックする
      */
-    function setWalletCALLevel(address to,uint256 level) external virtual override onlyLocker {
-        _setWalletCALLevel(to, level);
+    function lockWallet(address to) external virtual override onlyLocker {
+        _lockWallet(to);
+    }
+
+    /**
+     * @dev トークン所有者のウォレットアドレスのロックを解除する
+     */
+    function unlockWallet(address to) external virtual override onlyLocker {
+        _unlockWallet(to);
     }
 
     function isLocker(address operator) public view returns (bool) {

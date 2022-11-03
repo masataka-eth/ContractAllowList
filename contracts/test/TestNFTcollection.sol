@@ -5,27 +5,48 @@ import "../ERC721AntiScam/ERC721AntiScam.sol";
 
 contract TestNFTcollection is ERC721AntiScam {
     constructor(address _cal) ERC721A("TestNFTcollection", "TEST") {
-        CAL = IContractAllowListProxy(_cal);
+        _setCAL(_cal);
     }
 
     function mint(uint256 _mintAmount) public payable {
         _safeMint(msg.sender, _mintAmount);
     }
 
-    function setLocalContractAllowList(address _contract, bool _state)
+    function lock(uint256[] calldata tokenIds) external virtual override {
+        for(uint256 i=0; i < tokenIds.length; i++){
+            require(msg.sender == ownerOf(tokenIds[i]), "not owner.");
+        }
+        _lock(tokenIds);
+    }
+    
+    function unlock(uint256[] calldata tokenIds) external virtual override {
+        for(uint256 i=0; i < tokenIds.length; i++){
+            require(msg.sender == ownerOf(tokenIds[i]), "not owner.");
+        }
+        _unlock(tokenIds);
+    }
+    
+    function addLocalContractAllowList(address transferer)
         external
-    {}
-
-    function setLock(LockStatus status, uint256 tokenId) public {
-        require(ownerOf(tokenId) == msg.sender);
-        _lock(status, tokenId);
+        override
+        onlyOwner
+    {
+        _addLocalContractAllowList(transferer);
     }
 
-    function setLockAdmin(LockStatus status, uint256 tokenId) public onlyOwner{
-        _lock(status, tokenId);
+    function removeLocalContractAllowList(address transferer)
+        external
+        override
+        onlyOwner
+    {
+        _removeLocalContractAllowList(transferer);
     }
 
-    function setWalletLock(LockStatus status) public {
-        _setWalletLock(msg.sender, status);
+    function setCalLevel(uint256 level) external override onlyOwner {
+        CALLevel = level;
+    }
+
+    function setContractLockStatus(LockStatus lockStatus) external onlyOwner {
+        contractLockStatus = lockStatus;
     }
 }

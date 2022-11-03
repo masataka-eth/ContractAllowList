@@ -46,7 +46,7 @@ export const deploy = async (owner: Signer) => {
   const testNFT = await TestNFTcollection.connect(owner).deploy(contractAllowList.address)
   await testNFT.deployed()
 
-  await testNFT.connect(owner).setContractAllowListLevel(0)
+  await testNFT.connect(owner).setCalLevel(0)
 
   const MarketDummy = await ethers.getContractFactory("MarketDummy")
   const market = await MarketDummy.connect(owner).deploy()

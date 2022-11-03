@@ -16,14 +16,14 @@ describe("ERC721AntiScam", function () {
     it("setApprovalForAll実行後にロックを厳しくした場合にfalseになること", async () => {
       const { testNFT, owner, account } = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
         .not.to.be.reverted
 
       expect(await testNFT.isApprovedForAll(account.address, allowedAddressesLv1[0]))
         .to.equals(true)
 
-      await testNFT.connect(owner).setContractLockStatus(3)
+      await testNFT.connect(owner).setContractLockStatus(2)
       expect(await testNFT.isApprovedForAll(account.address, allowedAddressesLv1[0]))
         .to.equals(false)
     })
@@ -33,7 +33,7 @@ describe("ERC721AntiScam", function () {
     it("指定レベルの認可対象は成功すること", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
         .not.to.be.reverted
 
@@ -43,7 +43,7 @@ describe("ERC721AntiScam", function () {
     it("全レベルの認可対象外は失敗すること", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await expect(testNFT.connect(account).setApprovalForAll(account.address, true))
         .to.be.reverted
     })
@@ -51,7 +51,7 @@ describe("ERC721AntiScam", function () {
     it("指定レベルに含まない認可対象外は失敗すること", async () => {
       const { testNFT, account,owner } = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv2[0], true))
         .to.be.reverted
     })
@@ -59,7 +59,7 @@ describe("ERC721AntiScam", function () {
     it("指定レベルをあげれば成功すること", async () => {
       const { testNFT, owner, account } = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(2);
+      await testNFT.connect(owner).setCalLevel(2);
       await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv2[0], true))
         .not.to.be.reverted
       await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 0)).not.to.be.reverted
@@ -70,10 +70,10 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=ALLLock,WalletLock=ALLLock,TokenLock=Unlock is success", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
-      await testNFT.connect(owner).setContractLockStatus(3); //ALLLock
-      await testNFT.connect(account).setWalletLock(3); //ALLLock
-      await testNFT.connect(account).setLock(1,0); //Unlock
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setContractLockStatus(2); //ALLLock
+      await testNFT.connect(account).lockWallet(); //ALLLock
+      await testNFT.connect(account).unlock([0]); //Unlock
       await expect(testNFT.connect(account).approve(owner.address, 0))
         .not.to.be.reverted
     })
@@ -81,10 +81,10 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=Unlock,WalletLock=Unlock,TokenLock=CALLock is failure", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
-      await testNFT.connect(owner).setContractLockStatus(1); //Unlock
-      await testNFT.connect(account).setWalletLock(1); //Unlock
-      await testNFT.connect(account).setLock(2,0); //CALLock
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setContractLockStatus(1); //UnLLock
+      await testNFT.connect(account).unlockWallet(); //UnSet
+      await testNFT.connect(account).unlock([0]); //UnSet
       await expect(testNFT.connect(account).approve(owner.address, 0))
         .to.be.reverted
     })
@@ -92,10 +92,10 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=ALLLock,WalletLock=ALLLock,TokenLock=CALLock,allowedAddress is success", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
-      await testNFT.connect(owner).setContractLockStatus(3); //ALLLock
-      await testNFT.connect(account).setWalletLock(3); //ALLLock
-      await testNFT.connect(account).setLock(2,0); //CALLock
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setContractLockStatus(2); //UnLLock
+      await testNFT.connect(account).unlockWallet(); //UnLock
+      await testNFT.connect(account).unlock([0]); //Unlock
       await expect(testNFT.connect(account).approve(allowedAddressesLv1[0], 0))
         .not.to.be.reverted
     })
@@ -103,10 +103,10 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=Unlock,WalletLock=Unlock,TokenLock=ALLLock is failure", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await testNFT.connect(owner).setContractLockStatus(1); //Unlock
-      await testNFT.connect(account).setWalletLock(1); //Unlock
-      await testNFT.connect(account).setLock(3,0); //ALLLock
+      await testNFT.connect(account).unlockWallet(); //UnLock
+      await testNFT.connect(account).lock([0]); //Unlock
       await expect(testNFT.connect(account).approve(owner.address, 0))
         .to.be.reverted
     })
@@ -114,10 +114,10 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=ALLLock,WalletLock=Unlock,TokenLock=UnSet is success", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
-      await testNFT.connect(owner).setContractLockStatus(3); //ALLLock
-      await testNFT.connect(account).setWalletLock(1); //Unlock
-      await testNFT.connect(account).setLock(0,0); //UnSet
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setContractLockStatus(2); //Unlock
+      await testNFT.connect(account).unlockWallet(); //UnLock
+      await testNFT.connect(account).lock([0]); //Unlock
       await expect(testNFT.connect(account).approve(owner.address, 0))
         .not.to.be.reverted
     })
@@ -125,10 +125,10 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=Unlock,WalletLock=CALLock,TokenLock=UnSet is failure", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await testNFT.connect(owner).setContractLockStatus(1); //Unlock
-      await testNFT.connect(account).setWalletLock(2); //CALLock
-      await testNFT.connect(account).setLock(0,0); //UnSet
+      await testNFT.connect(account).unlockWallet(); //UnLock
+      await testNFT.connect(account).lock([0]); //Unlock
       await expect(testNFT.connect(account).approve(owner.address, 0))
         .to.be.reverted
     })
@@ -136,7 +136,7 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=ALLLock,WalletLock=CALLock,TokenLock=UnSet,allowedAddress is success", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await testNFT.connect(owner).setContractLockStatus(3); //ALLLock
       await testNFT.connect(account).setWalletLock(2); //CALLock
       await testNFT.connect(account).setLock(0,0); //UnSet
@@ -147,7 +147,7 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=Unlock,WalletLock=ALLLock,TokenLock=UnSet is failure", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await testNFT.connect(owner).setContractLockStatus(1); //Unlock
       await testNFT.connect(account).setWalletLock(3); //ALLLock
       await testNFT.connect(account).setLock(0,0); //UnSet
@@ -158,7 +158,7 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=Unlock,WalletLock=UnSet,TokenLock=UnSet is success", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await testNFT.connect(owner).setContractLockStatus(1); //Unlock
       await testNFT.connect(account).setWalletLock(0); //UnSet
       await testNFT.connect(account).setLock(0,0); //UnSet
@@ -169,7 +169,7 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=CALLock,WalletLock=UnSet,TokenLock=UnSet is failure", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await testNFT.connect(owner).setContractLockStatus(2); //CALLock
       await testNFT.connect(account).setWalletLock(0); //UnSet
       await testNFT.connect(account).setLock(0,0); //UnSet
@@ -180,7 +180,7 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=CALLock,WalletLock=UnSet,TokenLock=UnSet,allowedAddress is success", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await testNFT.connect(owner).setContractLockStatus(2); //CALLock
       await testNFT.connect(account).setWalletLock(0); //UnSet
       await testNFT.connect(account).setLock(0,0); //UnSet
@@ -191,7 +191,7 @@ describe("ERC721AntiScam", function () {
     it("ContractLock=ALLLock,WalletLock=UnSet,TokenLock=UnSet is failure", async () => {
       const { testNFT, account ,owner} = await loadFixture(fixture)
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      await testNFT.connect(owner).setContractAllowListLevel(1);  //level 0は全拒否
+      await testNFT.connect(owner).setCalLevel(1);  //level 0は全拒否
       await testNFT.connect(owner).setContractLockStatus(3); //ALLLock
       await testNFT.connect(account).setWalletLock(0); //UnSet
       await testNFT.connect(account).setLock(0,0); //UnSet
@@ -298,14 +298,9 @@ describe("ERC721AntiScam", function () {
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
 
       // 所有者によるロックイベント
-      await expect(testNFT.connect(account).setLock(1, 0))
+      await expect(testNFT.connect(account).lock(0))
             .to.emit(testNFT, 'TokenLock')
-            .withArgs(account.address, account.address, 1, 0)
-
-      // 所有者以外によるロックイベント
-      await expect(testNFT.connect(owner).setLockAdmin(3, 0))
-            .to.emit(testNFT, 'TokenLock')
-            .withArgs(account.address, owner.address, 3, 0)        
+            .withArgs(account.address, account.address, 1, 0)        
     })
   })
 

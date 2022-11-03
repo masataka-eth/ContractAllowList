@@ -3,25 +3,21 @@ pragma solidity >=0.8.0;
 
 import "./IERC721Lockable.sol";
 import "erc721a/contracts/ERC721A.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /// @title トークンのtransfer抑止機能付きコントラクト
 /// @dev Readmeを見てください。
 
 abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
-    using EnumerableSet for EnumerableSet.AddressSet;
-
     /*//////////////////////////////////////////////////////////////
     ロック変数。トークンごとに個別ロック設定を行う
     //////////////////////////////////////////////////////////////*/
     bool public enableLock = true;
     LockStatus public contractLockStatus = LockStatus.UnLock;
 
-    // token lock 0:unset, 1:unlock, 2:lock
+    // token lock
     mapping(uint256 => LockStatus) internal _tokenLock;
 
-    // wallet lock 0:unset, 1:unlock, 2:lock
+    // wallet lock
     mapping(address => LockStatus) internal _walletLock;
 
     /*//////////////////////////////////////////////////////////////
@@ -91,7 +87,70 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         public
         view
         returns (uint256[] memory)
-    {}
+    {
+        bool[] memory lockList = new bool[](end - start);
+        uint256 i = 0;
+        uint256 lockCount = 0;
+        for (uint256 tokenId = start; tokenId <= end; tokenId++) {
+            if (_exists(tokenId) && isLocked(tokenId)) {
+                lockList[i] = true;
+                lockCount++;
+            } else {
+                lockList[i] = false;
+            }
+
+            i++;
+        }
+
+        uint256[] memory tokensUnderLock = new uint256[](lockCount);
+
+        i = 0;
+        uint256 j = 0;
+        for (uint256 tokenId = start; tokenId <= end; tokenId++) {
+            if (lockList[i]) {
+                tokensUnderLock[j] = tokenId;
+                j++;
+            }
+
+            i++;
+        }
+
+        return tokensUnderLock;
+    }
+
+    function _deleteTokenLock(uint256 tokenId) internal virtual {
+        delete _tokenLock[tokenId];
+    }
+
+    function _lock(uint256[] calldata tokenIds) internal {
+        _setTokenLock(tokenIds, LockStatus.Lock);
+    }
+
+    function _unlock(uint256[] calldata tokenIds) internal {
+        _setTokenLock(tokenIds, LockStatus.UnLock);
+    }
+
+    function _setTokenLock(uint256[] calldata tokenIds, LockStatus lockStatus) private {
+        for(uint256 i = 0; i<tokenIds.length; i++){
+            _tokenLock[tokenIds[i]] = lockStatus;
+        }
+    }
+
+    function lockWallet() external {
+        _walletLock[msg.sender] = LockStatus.Lock;
+    }
+
+    function unlockWallet() external {
+        _walletLock[msg.sender] = LockStatus.UnLock;
+    }
+    
+    function _lockWallet(address target) internal {
+        _walletLock[target] = LockStatus.Lock;
+    }
+
+    function _unlockWallet(address target) internal {
+        _walletLock[target] = LockStatus.UnLock;
+    }
 
     /*///////////////////////////////////////////////////////////////
                               OVERRIDES
@@ -128,7 +187,10 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         virtual
         override
     {
-        require(isLocked(tokenId) == false, "Lockable: Can not approve locked token");
+        require(
+            isLocked(tokenId) == false,
+            "Lockable: Can not approve locked token"
+        );
         super.approve(to, tokenId);
     }
 
@@ -139,9 +201,12 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         uint256 /*quantity*/
     ) internal virtual override {
         // 転送やバーンにおいては、常にstartTokenIdは TokenIDそのものとなります。
-        if (from != address(0) || to != address(0)) {
+        if (from != address(0) && to != address(0)) {
             // トークンがロックされている場合、転送を許可しない
-            require(isLocked(startTokenId) == false, "Lockable: Can not transfer locked token");
+            require(
+                isLocked(startTokenId) == false,
+                "Lockable: Can not transfer locked token"
+            );
         }
     }
 
@@ -154,7 +219,7 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         // 転送やバーンにおいては、常にstartTokenIdは TokenIDそのものとなります。
         if (from != address(0)) {
             // ロックをデフォルトに戻す。
-            delete _tokenLock[startTokenId];
+            _deleteTokenLock(startTokenId);
         }
     }
 
