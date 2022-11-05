@@ -1,36 +1,58 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.9;
 
-import './IERC721AntiScamControl.sol';
-import '../ERC721AntiScam.sol';
+import "./IERC721AntiScamControl.sol";
+import "../ERC721AntiScam.sol";
 
-abstract contract ERC721AntiScamControl is IERC721AntiScamControl, ERC721AntiScam {
+abstract contract ERC721AntiScamControl is
+    IERC721AntiScamControl,
+    ERC721AntiScam
+{
     mapping(address => bool) _operators;
 
+    /*///////////////////////////////////////////////////////////////
+                        OVERRIDES ERC721Lockable
+    //////////////////////////////////////////////////////////////*/
+    
     modifier onlyLocker() {
         checkLockerRole(msg.sender);
         _;
     }
 
     /**
-     * @dev トークンレベルでのロックステータスを変更する
+     * @dev トークンレベルのロックステータスを変更する
      */
-    function lock(LockStatus status, uint256 id) external virtual onlyLocker {
-        _lock(status, id);
+    function setTokenLock(uint256[] calldata tokenIds, LockStatus lockStatus)
+        external
+        virtual
+        override
+        onlyLocker
+    {
+        _setTokenLock(tokenIds, lockStatus);
     }
 
     /**
-     * @dev トークン所有者のウォレットアドレスにおけるロックステータスを変更する
+     * @dev トークン所有者のウォレットアドレスのロックステータスを変更する
      */
-    function setWalletLock(address to, LockStatus status) external virtual override onlyLocker {
-        _setWalletLock(to, status);
+    function setWalletLock(address to, LockStatus lockStatus)
+        external
+        virtual
+        override
+        onlyLocker
+    {
+        _setWalletLock(to, lockStatus);
     }
 
     /**
-     * @dev トークン所有者のウォレットアドレスにおけるCALレベルを変更する
+     * @dev コントラクトのロックステータスを変更する
      */
-    function setWalletCALLevel(address to,uint256 level) external virtual override onlyLocker {
-        _setWalletCALLevel(to, level);
+    function setContractLock(LockStatus lockStatus)
+        external
+        virtual
+        override
+        onlyLocker
+    {
+        _setContractLock(lockStatus);
     }
 
     function isLocker(address operator) public view returns (bool) {
@@ -38,7 +60,10 @@ abstract contract ERC721AntiScamControl is IERC721AntiScamControl, ERC721AntiSca
     }
 
     function _grantLockerRole(address candidate) internal {
-        require(!_operators[candidate],'account is already has an operator role');
+        require(
+            !_operators[candidate],
+            "account is already has an operator role"
+        );
         _operators[candidate] = true;
     }
 
@@ -48,6 +73,6 @@ abstract contract ERC721AntiScamControl is IERC721AntiScamControl, ERC721AntiSca
     }
 
     function checkLockerRole(address operator) public view {
-        require(_operators[operator],'account is not an locker');
+        require(_operators[operator], "account is not an locker");
     }
 }
