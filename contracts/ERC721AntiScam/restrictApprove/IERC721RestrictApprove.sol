@@ -24,7 +24,12 @@ interface IERC721RestrictApprove {
     /**
      * @dev CALを利用する場合のCALのレベルを設定する。レベルが高いほど、許可されるコントラクトの範囲が狭い。
      */
-    function setCalLevel(uint256 level) external;
+    function setCALLevel(uint256 level) external;
+
+    /**
+     * @dev CALのアドレスをセットする。
+     */
+    function setCAL(address calAddress) external;
 
     /**
      * @dev CALのリストに無い独自の許可アドレスを追加する場合、こちらにアドレスを記載する。

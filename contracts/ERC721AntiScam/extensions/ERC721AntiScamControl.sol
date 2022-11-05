@@ -1,43 +1,58 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.9;
 
-import './IERC721AntiScamControl.sol';
-import '../ERC721AntiScam.sol';
+import "./IERC721AntiScamControl.sol";
+import "../ERC721AntiScam.sol";
 
-abstract contract ERC721AntiScamControl is IERC721AntiScamControl, ERC721AntiScam {
+abstract contract ERC721AntiScamControl is
+    IERC721AntiScamControl,
+    ERC721AntiScam
+{
     mapping(address => bool) _operators;
 
+    /*///////////////////////////////////////////////////////////////
+                        OVERRIDES ERC721Lockable
+    //////////////////////////////////////////////////////////////*/
+    
     modifier onlyLocker() {
         checkLockerRole(msg.sender);
         _;
     }
 
     /**
-     * @dev トークンレベルでロックする
+     * @dev トークンレベルのロックステータスを変更する
      */
-    function lock(uint256[] calldata tokenIds) external virtual override onlyLocker {
-        _lock(tokenIds);
+    function setTokenLock(uint256[] calldata tokenIds, LockStatus lockStatus)
+        external
+        virtual
+        override
+        onlyLocker
+    {
+        _setTokenLock(tokenIds, lockStatus);
     }
 
     /**
-     * @dev トークンレベルでのロックを解除する
+     * @dev トークン所有者のウォレットアドレスのロックステータスを変更する
      */
-    function unlock(uint256[] calldata tokenIds) external virtual override onlyLocker {
-        _unlock(tokenIds);
+    function setWalletLock(address to, LockStatus lockStatus)
+        external
+        virtual
+        override
+        onlyLocker
+    {
+        _setWalletLock(to, lockStatus);
     }
 
     /**
-     * @dev トークン所有者のウォレットアドレスをロックする
+     * @dev コントラクトのロックステータスを変更する
      */
-    function lockWallet(address to) external virtual override onlyLocker {
-        _lockWallet(to);
-    }
-
-    /**
-     * @dev トークン所有者のウォレットアドレスのロックを解除する
-     */
-    function unlockWallet(address to) external virtual override onlyLocker {
-        _unlockWallet(to);
+    function setContractLock(LockStatus lockStatus)
+        external
+        virtual
+        override
+        onlyLocker
+    {
+        _setContractLock(lockStatus);
     }
 
     function isLocker(address operator) public view returns (bool) {
@@ -45,7 +60,10 @@ abstract contract ERC721AntiScamControl is IERC721AntiScamControl, ERC721AntiSca
     }
 
     function _grantLockerRole(address candidate) internal {
-        require(!_operators[candidate],'account is already has an operator role');
+        require(
+            !_operators[candidate],
+            "account is already has an operator role"
+        );
         _operators[candidate] = true;
     }
 
@@ -55,6 +73,6 @@ abstract contract ERC721AntiScamControl is IERC721AntiScamControl, ERC721AntiSca
     }
 
     function checkLockerRole(address operator) public view {
-        require(_operators[operator],'account is not an locker');
+        require(_operators[operator], "account is not an locker");
     }
 }

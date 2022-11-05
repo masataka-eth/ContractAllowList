@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0;
 
-import "../ERC721AntiScam/extensions/ERC721AntiScamControl.sol";
+import "../../ERC721AntiScam/extensions/ERC721AntiScamControl.sol";
 
 contract MockERC721AntiScamControl is ERC721AntiScamControl {
     constructor() ERC721A("MockERC721AntiScamControl", "MOCK") {}
@@ -37,7 +37,11 @@ contract MockERC721AntiScamControl is ERC721AntiScamControl {
         _removeLocalContractAllowList(transferer);
     }
 
-    function setCalLevel(uint256 level) external override onlyOwner {
+    function setCALLevel(uint256 level) external override onlyOwner {
         CALLevel = level;
+    }
+    
+    function setCAL(address calAddress) external onlyOwner {
+        _setCAL(calAddress);
     }
 }

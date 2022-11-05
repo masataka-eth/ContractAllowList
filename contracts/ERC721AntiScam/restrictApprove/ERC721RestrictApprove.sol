@@ -26,7 +26,7 @@ abstract contract ERC721RestrictApprove is ERC721A, IERC721RestrictApprove {
     /*//////////////////////////////////////////////////////////////
     ロック変数。トークンごとに個別ロック設定を行う
     //////////////////////////////////////////////////////////////*/
-    bool public enableRistrict = true;
+    bool public enableRestrict = true;
 
     // token lock
     mapping(uint256 => uint256) public tokenCALLevel;
@@ -100,11 +100,11 @@ abstract contract ERC721RestrictApprove is ERC721A, IERC721RestrictApprove {
         virtual
         returns (bool)
     {
-        if (!enableRistrict) {
+        if (!enableRestrict) {
             return true;
         }
 
-        return CAL.isAllowed(transferer, level);
+        return _isLocalAllowed(transferer) || CAL.isAllowed(transferer, level);
     }
 
     function _getCALLevel(address holder, uint256 tokenId)

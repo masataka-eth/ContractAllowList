@@ -17,22 +17,27 @@ interface IERC721Lockable {
     /**
      * @dev 個別ロックが指定された場合のイベント
      */
-    event TokenLock(address indexed holder, address indexed operator, uint lockStatus, uint256 indexed tokenId);
+    event TokenLock(address indexed holder, address indexed operator, LockStatus lockStatus, uint256 indexed tokenId);
     
     /**
      * @dev ウォレットロックが指定された場合のイベント
      */
-    event WalletLock(address indexed holder, address indexed operator, uint lockStatus);
+    event WalletLock(address indexed holder, address indexed operator, LockStatus lockStatus);
 
     /**
-     * @dev 該当トークンIDをロックする。
+     * @dev 該当トークンIDのロックステータスを変更する。
      */
-    function lock(uint256[] calldata tokenIds) external;
+    function setTokenLock(uint256[] calldata tokenIds, LockStatus lockStatus) external;
 
     /**
-     * @dev 該当トークンIDをアンロックする。
+     * @dev 該当ウォレットのロックステータスを変更する。
      */
-    function unlock(uint256[] calldata tokenIds) external;
+    function setWalletLock(address to, LockStatus lockStatus) external;
+
+    /**
+     * @dev コントラクトのロックステータスを変更する。
+     */
+    function setContractLock(LockStatus lockStatus) external;
 
     /**
      * @dev 該当トークンIDがロックされているかを返す

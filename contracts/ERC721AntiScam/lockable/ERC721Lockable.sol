@@ -15,10 +15,10 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
     LockStatus public contractLockStatus = LockStatus.UnLock;
 
     // token lock
-    mapping(uint256 => LockStatus) internal _tokenLock;
+    mapping(uint256 => LockStatus) public tokenLock;
 
     // wallet lock
-    mapping(address => LockStatus) internal _walletLock;
+    mapping(address => LockStatus) public walletLock;
 
     /*//////////////////////////////////////////////////////////////
     ロック変数。トークンごとに個別ロック設定を行う
@@ -45,13 +45,13 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         existToken(tokenId)
         returns (bool)
     {
-        if (enableLock) {
+        if (!enableLock) {
             return false;
         }
 
         if (
-            _tokenLock[tokenId] == LockStatus.Lock ||
-            (_tokenLock[tokenId] == LockStatus.UnSet &&
+            tokenLock[tokenId] == LockStatus.Lock ||
+            (tokenLock[tokenId] == LockStatus.UnSet &&
                 isLocked(ownerOf(tokenId)))
         ) {
             return true;
@@ -66,8 +66,8 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         }
 
         if (
-            _walletLock[holder] == LockStatus.Lock ||
-            (_walletLock[holder] == LockStatus.UnSet &&
+            walletLock[holder] == LockStatus.Lock ||
+            (walletLock[holder] == LockStatus.UnSet &&
                 contractLockStatus == LockStatus.Lock)
         ) {
             return true;
@@ -119,37 +119,23 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
     }
 
     function _deleteTokenLock(uint256 tokenId) internal virtual {
-        delete _tokenLock[tokenId];
+        delete tokenLock[tokenId];
     }
 
-    function _lock(uint256[] calldata tokenIds) internal {
-        _setTokenLock(tokenIds, LockStatus.Lock);
-    }
-
-    function _unlock(uint256[] calldata tokenIds) internal {
-        _setTokenLock(tokenIds, LockStatus.UnLock);
-    }
-
-    function _setTokenLock(uint256[] calldata tokenIds, LockStatus lockStatus) private {
+    function _setTokenLock(uint256[] calldata tokenIds, LockStatus lockStatus) internal {
         for(uint256 i = 0; i<tokenIds.length; i++){
-            _tokenLock[tokenIds[i]] = lockStatus;
+            tokenLock[tokenIds[i]] = lockStatus;
+            emit TokenLock(ownerOf(tokenIds[i]), msg.sender, lockStatus, tokenIds[i]);
         }
     }
 
-    function lockWallet() external {
-        _walletLock[msg.sender] = LockStatus.Lock;
-    }
-
-    function unlockWallet() external {
-        _walletLock[msg.sender] = LockStatus.UnLock;
+    function _setWalletLock(address to, LockStatus lockStatus) internal {
+        walletLock[to] = lockStatus;
+        emit WalletLock(to, msg.sender, lockStatus);
     }
     
-    function _lockWallet(address target) internal {
-        _walletLock[target] = LockStatus.Lock;
-    }
-
-    function _unlockWallet(address target) internal {
-        _walletLock[target] = LockStatus.UnLock;
+    function _setContractLock(LockStatus lockStatus) internal {
+        contractLockStatus = lockStatus;
     }
 
     /*///////////////////////////////////////////////////////////////

@@ -7,6 +7,9 @@ export const allowedAddressesLv1 = ['0x976EA74026E726554dB657fA54763abd0C3a0aa9'
 export const allowedAddressesLv2 = ['0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65']
   .map(address => ethers.utils.getAddress(address))
 
+export const allowedAddressesLocal = ['0x4Df74Aa88c771a82121A8F15b69505Edd5Ff8Aad']
+  .map(address => ethers.utils.getAddress(address))
+
 
 export const deploy = async (owner: Signer) => {
   const CALVoteToken = await ethers.getContractFactory("CALVoteToken")
@@ -46,7 +49,11 @@ export const deploy = async (owner: Signer) => {
   const testNFT = await TestNFTcollection.connect(owner).deploy(contractAllowList.address)
   await testNFT.deployed()
 
-  await testNFT.connect(owner).setCalLevel(0)
+  for (const allowd of allowedAddressesLocal) {
+    await testNFT.connect(owner).addLocalContractAllowList(allowd)
+  }
+
+  await testNFT.connect(owner).setCALLevel(0)
 
   const MarketDummy = await ethers.getContractFactory("MarketDummy")
   const market = await MarketDummy.connect(owner).deploy()

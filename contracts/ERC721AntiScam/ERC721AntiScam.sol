@@ -15,9 +15,6 @@ abstract contract ERC721AntiScam is
     ERC721RestrictApprove,
     Ownable
 {
-    function setCAL(address _cal) external onlyOwner {
-        _setCAL(_cal);
-    }
 
     /*///////////////////////////////////////////////////////////////
                               OVERRIDES
