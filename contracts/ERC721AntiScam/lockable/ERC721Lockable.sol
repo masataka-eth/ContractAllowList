@@ -88,7 +88,7 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         view
         returns (uint256[] memory)
     {
-        bool[] memory lockList = new bool[](end - start);
+        bool[] memory lockList = new bool[](end - start + 1);
         uint256 i = 0;
         uint256 lockCount = 0;
         for (uint256 tokenId = start; tokenId <= end; tokenId++) {

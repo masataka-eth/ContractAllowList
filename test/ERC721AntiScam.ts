@@ -251,54 +251,14 @@ describe("ERC721AntiScam", function () {
       await expect(testNFT.connect(owner).setCAL("0x0000000000000000000000000000000000000000"))
         .not.to.be.reverted
 
-      // LockStatusをsetTokenLockに設定するとエラーにならず動く
-      await expect(testNFT.connect(owner).setContractLock(1))
+      await expect(testNFT.connect(owner).setContractLock(UnSet))
         .not.to.be.reverted
 
       await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
       await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLocal[0], true))
         .not.to.be.reverted
-      // await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 0)).not.to.be.reverted
-
-
-      // // LockStatusをCalLockに設定するとLocalAllowListに設定されていなければエラー
-      // await expect(testNFT.connect(owner).setContractLock(2))
-      //   .not.to.be.reverted
-
-      // await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      // await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
-      //   .to.be.revertedWith('Can not approve locked token')
-
-      // // LockStatusをCalLockに設定するとLocalAllowListに設定されていればエラーにならず動く
-      // await expect(testNFT.connect(owner).addLocalContractAllowList(allowedAddressesLv1[0]))
-      //   .not.to.be.reverted
-
-      // await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      // await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
-      //   .not.to.be.reverted
-      // await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 2)).not.to.be.reverted
-
-      // // LockStatusがCalLockの状態でLocalAllowListから削除すると再びエラー
-      // await expect(testNFT.connect(owner).removeLocalContractAllowList(allowedAddressesLv1[0]))
-      //   .not.to.be.reverted
-
-      // await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      // await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
-      //   .to.be.revertedWith('Can not approve locked token')
-
-      // // Lockに設定するとLocalAllowListに設定されていてもエラー
-      // await expect(testNFT.connect(owner).setContractLock(3))
-      //   .not.to.be.reverted
-      // await expect(testNFT.connect(owner).addLocalContractAllowList(allowedAddressesLv1[0]))
-      //   .not.to.be.reverted
-
-      // await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
-      // await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLv1[0], true))
-      //   .to.be.revertedWith('Can not approve locked token')
-
+      await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 0)).not.to.be.reverted
     })
-
-
   })
 
   describe("Event", () => {
@@ -333,31 +293,31 @@ describe("ERC721AntiScam", function () {
     })
   })
 
-  // describe("Interface of getTokensUnderLock", () =>{
-  //   it("getTokensUnderLockが長さ0の配列を返すこと", async () => {
-  //     const { testNFT, owner, account } = await loadFixture(fixture)
-  //     await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
+  describe("Interface of getTokensUnderLock", () => {
+    it("getTokensUnderLockが長さ0の配列を返すこと", async () => {
+      const { testNFT, owner, account } = await loadFixture(fixture)
+      await testNFT.connect(account).mint(10, { value: ethers.utils.parseEther("1") })
+      await testNFT.connect(owner).mint(10, { value: ethers.utils.parseEther("1") })
 
-  //     let res = await testNFT.connect(account)["getTokensUnderLock(address)"](account.address);
-  //     expect(res.length).to.be.equal(0)
+      expect(await testNFT["getTokensUnderLock()"]()).to.deep.equals([])
+      expect(await testNFT["getTokensUnderLock(uint256,uint256)"](0, 5)).to.deep.equals([]);
 
-  //     res = await testNFT.connect(account)["getTokensUnderLock(address,address)"](account.address, account.address);
-  //     expect(res.length).to.be.equal(0)
+      // token lock
+      await testNFT.connect(account).setTokenLock([1, 2, 3, 5, 6], Lock)
+      expect(await testNFT["getTokensUnderLock()"]()).to.deep.equals([1, 2, 3, 5, 6])
+      expect(await testNFT["getTokensUnderLock(uint256,uint256)"](3, 5)).to.deep.equals([3, 5]);
 
-  //     res = await testNFT.connect(account)["getTokensUnderLock(address,uint256,uint256)"](
-  //       account.address, 
-  //       1,
-  //       10);
-  //     expect(res.length).to.be.equal(0)
+      // wallet lock
+      await testNFT.connect(account).setWalletLock(account.address, Lock)
+      expect(await testNFT["getTokensUnderLock()"]()).to.deep.equals([...Array(10)].map((_, i) => i))
+      expect(await testNFT["getTokensUnderLock(uint256,uint256)"](3, 5)).to.deep.equals([3, 4, 5]);
 
-  //     res = await testNFT.connect(account)["getTokensUnderLock(address,address,uint256,uint256)"](
-  //       account.address, 
-  //       account.address,
-  //       1,
-  //       10);
-  //     expect(res.length).to.be.equal(0)
-
-  //   })
-  // })
+      // contract lock
+      await testNFT.connect(account).setWalletLock(account.address, UnSet)
+      await testNFT.connect(owner).setContractLock(Lock)
+      expect(await testNFT["getTokensUnderLock()"]()).to.deep.equals([...Array(20)].map((_, i) => i))
+      expect(await testNFT["getTokensUnderLock(uint256,uint256)"](9, 11)).to.deep.equals([9, 10, 11]);
+    })
+  })
 
 })
