@@ -21,7 +21,7 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
     mapping(address => LockStatus) public walletLock;
 
     /*//////////////////////////////////////////////////////////////
-    ロック変数。トークンごとに個別ロック設定を行う
+    modifier
     //////////////////////////////////////////////////////////////*/
     modifier existToken(uint256 tokenId) {
         require(
@@ -122,10 +122,17 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         delete tokenLock[tokenId];
     }
 
-    function _setTokenLock(uint256[] calldata tokenIds, LockStatus lockStatus) internal {
-        for(uint256 i = 0; i<tokenIds.length; i++){
+    function _setTokenLock(uint256[] calldata tokenIds, LockStatus lockStatus)
+        internal
+    {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             tokenLock[tokenIds[i]] = lockStatus;
-            emit TokenLock(ownerOf(tokenIds[i]), msg.sender, lockStatus, tokenIds[i]);
+            emit TokenLock(
+                ownerOf(tokenIds[i]),
+                msg.sender,
+                lockStatus,
+                tokenIds[i]
+            );
         }
     }
 
@@ -133,7 +140,7 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         walletLock[to] = lockStatus;
         emit WalletLock(to, msg.sender, lockStatus);
     }
-    
+
     function _setContractLock(LockStatus lockStatus) internal {
         contractLockStatus = lockStatus;
     }
@@ -167,16 +174,20 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
         super.setApprovalForAll(operator, approved);
     }
 
+    function _beforeApprove(address /**to**/, uint256 tokenId) internal virtual {
+        require(
+            isLocked(tokenId) == false,
+            "Lockable: Can not approve locked token"
+        );
+    }
+
     function approve(address to, uint256 tokenId)
         public
         payable
         virtual
         override
     {
-        require(
-            isLocked(tokenId) == false,
-            "Lockable: Can not approve locked token"
-        );
+        _beforeApprove(to, tokenId);
         super.approve(to, tokenId);
     }
 

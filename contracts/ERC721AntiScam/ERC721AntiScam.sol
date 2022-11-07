@@ -49,23 +49,23 @@ abstract contract ERC721AntiScam is
         super.setApprovalForAll(operator, approved);
     }
 
+    function _beforeApprove(address to, uint256 tokenId)
+        internal
+        virtual
+        override(ERC721Lockable, ERC721RestrictApprove)
+    {
+        ERC721Lockable._beforeApprove(to, tokenId);
+        ERC721RestrictApprove._beforeApprove(to, tokenId);
+    }
+
     function approve(address to, uint256 tokenId)
         public
         payable
         virtual
         override(ERC721Lockable, ERC721RestrictApprove)
     {
-        if (to != address(0)) {
-            require(
-                isLocked(tokenId) == false,
-                "Lockable: Can not approve locked token"
-            );
-            require(
-                _isAllowed(tokenId, to),
-                "RestrictApprove: The contract is not allowed."
-            );
-        }
-        super.approve(to, tokenId);
+        _beforeApprove(to, tokenId);
+        ERC721A.approve(to, tokenId);
     }
 
     function _beforeTokenTransfers(
@@ -74,20 +74,17 @@ abstract contract ERC721AntiScam is
         uint256 startTokenId,
         uint256 quantity
     ) internal virtual override(ERC721A, ERC721Lockable) {
-        super._beforeTokenTransfers(from, to, startTokenId, quantity);
+        ERC721Lockable._beforeTokenTransfers(from, to, startTokenId, quantity);
     }
 
     function _afterTokenTransfers(
         address from,
-        address, /*to*/
+        address to,
         uint256 startTokenId,
-        uint256 /*quantity*/
+        uint256 quantity
     ) internal virtual override(ERC721Lockable, ERC721RestrictApprove) {
-        // 転送やバーンにおいては、常にstartTokenIdは TokenIDそのものとなります。
-        if (from != address(0)) {
-            _deleteTokenCALLevel(startTokenId);
-            _deleteTokenLock(startTokenId);
-        }
+        ERC721Lockable._afterTokenTransfers(from, to, startTokenId, quantity);
+        ERC721RestrictApprove._afterTokenTransfers(from, to, startTokenId, quantity);
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -98,9 +95,9 @@ abstract contract ERC721AntiScam is
         returns (bool)
     {
         return
-            interfaceId == type(IERC721AntiScam).interfaceId ||
-            interfaceId == type(IERC721Lockable).interfaceId ||
-            interfaceId == type(IERC721RestrictApprove).interfaceId ||
-            super.supportsInterface(interfaceId);
+            ERC721A.supportsInterface(interfaceId) ||
+            ERC721Lockable.supportsInterface(interfaceId) ||
+            ERC721RestrictApprove.supportsInterface(interfaceId) ||
+            interfaceId == type(IERC721AntiScam).interfaceId;
     }
 }

@@ -234,13 +234,13 @@ describe("ERC721AntiScam", function () {
       expect(gotCAL).to.equals(newContractAllowListProxy.address)
 
       // owner以外はCALを設定できない
-      await expect(testNFT.connect(account).setCAL(newContractAllowListProxy.address)).to.be.revertedWith('Ownable: caller is not the owner')
+      await expect(testNFT.connect(account).setCAL(newContractAllowListProxy.address)).to.be.reverted
 
       // ownerは0x000...を設定できる
-      await expect(testNFT.connect(owner).setCAL("0x0000000000000000000000000000000000000000"))
+      await expect(testNFT.connect(owner).setCAL(ethers.constants.AddressZero))
         .not.to.be.reverted
       gotCAL = await testNFT.CAL()
-      expect(gotCAL).to.equals("0x0000000000000000000000000000000000000000")
+      expect(gotCAL).to.equals(ethers.constants.AddressZero)
 
     })
 
@@ -248,7 +248,7 @@ describe("ERC721AntiScam", function () {
       const { testNFT, market, owner, account } = await loadFixture(fixture)
 
       // ownerは0x000...を設定できる
-      await expect(testNFT.connect(owner).setCAL("0x0000000000000000000000000000000000000000"))
+      await expect(testNFT.connect(owner).setCAL(ethers.constants.AddressZero))
         .not.to.be.reverted
 
       await expect(testNFT.connect(owner).setContractLock(UnSet))
@@ -317,6 +317,22 @@ describe("ERC721AntiScam", function () {
       await testNFT.connect(owner).setContractLock(Lock)
       expect(await testNFT["getTokensUnderLock()"]()).to.deep.equals([...Array(20)].map((_, i) => i))
       expect(await testNFT["getTokensUnderLock(uint256,uint256)"](9, 11)).to.deep.equals([9, 10, 11]);
+    })
+  })
+
+
+  describe("supportsInterfaces", () => {
+    it("ERC721", async () => {
+      const { testNFT } = await loadFixture(fixture)
+      expect(await testNFT.supportsInterface("0x80ac58cd")).to.be.true
+    })
+    it("ERC721Metadata", async () => {
+      const { testNFT } = await loadFixture(fixture)
+      expect(await testNFT.supportsInterface("0x5b5e139f")).to.be.true
+    })
+    it("ERC165", async () => {
+      const { testNFT } = await loadFixture(fixture)
+      expect(await testNFT.supportsInterface("0x01ffc9a7")).to.be.true
     })
   })
 
