@@ -56,6 +56,15 @@ abstract contract ERC721RestrictApprove is ERC721A, IERC721RestrictApprove {
         emit LocalCalRemoved(msg.sender, transferer);
     }
 
+    function _getLocalContractAllowList()
+        internal
+        virtual
+        view
+        returns(address[] memory)
+    {
+        return localAllowedAddresses.values();
+    }
+
     function _isLocalAllowed(address transferer)
         internal
         view

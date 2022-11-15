@@ -64,6 +64,15 @@ contract TestNFTcollection is ERC721AntiScam, AccessControl {
         _removeLocalContractAllowList(transferer);
     }
 
+    function getLocalContractAllowList()
+        external
+        override
+        view
+        returns(address[] memory)
+    {
+        return _getLocalContractAllowList();
+    }
+
     function setCALLevel(uint256 level) external override onlyRole(ADMIN) {
         CALLevel = level;
     }
