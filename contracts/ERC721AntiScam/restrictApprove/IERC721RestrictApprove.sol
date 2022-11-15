@@ -41,4 +41,9 @@ interface IERC721RestrictApprove {
      */
     function removeLocalContractAllowList(address transferer) external;
 
+    /**
+     * @dev CALのリストにある独自の許可アドレスの一覧を取得する。
+     */
+    function getLocalContractAllowList() external view returns(address[] memory);
+
 }

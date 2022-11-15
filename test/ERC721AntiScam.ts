@@ -259,6 +259,42 @@ describe("ERC721AntiScam", function () {
         .not.to.be.reverted
       await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 0)).not.to.be.reverted
     })
+
+    it("LocalCALの追加と削除", async () => {
+      const { testNFT, market, owner, account } = await loadFixture(fixture)
+      
+      expect((await testNFT.connect(owner).getLocalContractAllowList())[0]).to.equal(allowedAddressesLocal[0])
+
+      // 削除
+      expect(await testNFT.connect(owner).removeLocalContractAllowList(allowedAddressesLocal[0])).to.be.ok
+
+      expect((await testNFT.connect(account).getLocalContractAllowList()).length).to.equal(0)
+
+      await testNFT.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
+      await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLocal[0], true))
+        .to.be.reverted
+
+      // 追加
+      expect(await testNFT.connect(owner).addLocalContractAllowList(allowedAddressesLocal[0])).to.be.ok
+
+      const allowedAddressesLocal2 = ethers.utils.getAddress('0x0dAE5FcaD0DF8E5C029D76927582DFBdFd7eeC79')
+
+      await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLocal2, true))
+        .to.be.reverted
+
+      expect(await testNFT.connect(owner).addLocalContractAllowList(allowedAddressesLocal2)).to.be.ok
+
+      await expect(testNFT.connect(account).setApprovalForAll(allowedAddressesLocal2, true))
+        .not.to.be.reverted
+      await expect(testNFT.connect(account)["safeTransferFrom(address,address,uint256)"](account.address, owner.address, 0)).not.to.be.reverted
+
+      const localContractAllowList = await testNFT.connect(account).getLocalContractAllowList()
+      expect(localContractAllowList.length).to.equal(2)
+      expect(localContractAllowList[0]).to.equal(allowedAddressesLocal[0])
+      expect(localContractAllowList[1]).to.equal(allowedAddressesLocal2)
+
+    })
+
   })
 
   describe("Event", () => {
