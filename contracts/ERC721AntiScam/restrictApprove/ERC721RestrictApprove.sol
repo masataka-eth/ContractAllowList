@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "erc721a/contracts/ERC721A.sol";
+import "erc721psi/contracts/ERC721Psi.sol";
 import "./IERC721RestrictApprove.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "../../proxy/interface/IContractAllowListProxy.sol";
@@ -9,7 +9,7 @@ import "../../proxy/interface/IContractAllowListProxy.sol";
 /// @title AntiScam機能付きERC721A
 /// @dev Readmeを見てください。
 
-abstract contract ERC721RestrictApprove is ERC721A, IERC721RestrictApprove {
+abstract contract ERC721RestrictApprove is ERC721Psi, IERC721RestrictApprove {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     IContractAllowListProxy public CAL;
@@ -205,7 +205,6 @@ abstract contract ERC721RestrictApprove is ERC721A, IERC721RestrictApprove {
 
     function approve(address to, uint256 tokenId)
         public
-        payable
         virtual
         override
     {

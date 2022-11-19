@@ -60,12 +60,11 @@ abstract contract ERC721AntiScam is
 
     function approve(address to, uint256 tokenId)
         public
-        payable
         virtual
         override(ERC721Lockable, ERC721RestrictApprove)
     {
         _beforeApprove(to, tokenId);
-        ERC721A.approve(to, tokenId);
+        ERC721Psi.approve(to, tokenId);
     }
 
     function _beforeTokenTransfers(
@@ -73,7 +72,7 @@ abstract contract ERC721AntiScam is
         address to,
         uint256 startTokenId,
         uint256 quantity
-    ) internal virtual override(ERC721A, ERC721Lockable) {
+    ) internal virtual override(ERC721Psi, ERC721Lockable) {
         ERC721Lockable._beforeTokenTransfers(from, to, startTokenId, quantity);
     }
 
@@ -95,7 +94,7 @@ abstract contract ERC721AntiScam is
         returns (bool)
     {
         return
-            ERC721A.supportsInterface(interfaceId) ||
+            ERC721Psi.supportsInterface(interfaceId) ||
             ERC721Lockable.supportsInterface(interfaceId) ||
             ERC721RestrictApprove.supportsInterface(interfaceId) ||
             interfaceId == type(IERC721AntiScam).interfaceId;

@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract TestNFTcollection is ERC721AntiScam, AccessControl {
     bytes32 public ADMIN = "ADMIN";
-
-    constructor(address _cal) ERC721A("TestNFTcollection", "TEST") {
+    
+    constructor(address _cal) ERC721Psi("TestNFTcollection", "TEST") {
         _setCAL(_cal);
         _setupRole(ADMIN, msg.sender);
     }
