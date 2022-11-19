@@ -2,10 +2,14 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../ERC721AntiScam/ERC721AntiScam.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract TestNFTcollection is ERC721AntiScam {
+contract TestNFTcollection is ERC721AntiScam, AccessControl {
+    bytes32 public ADMIN = "ADMIN";
+    
     constructor(address _cal) ERC721Psi("TestNFTcollection", "TEST") {
         _setCAL(_cal);
+        _setupRole(ADMIN, msg.sender);
     }
 
     function mint(uint256 _mintAmount) public payable {
@@ -47,7 +51,7 @@ contract TestNFTcollection is ERC721AntiScam {
     function addLocalContractAllowList(address transferer)
         external
         override
-        onlyOwner
+        onlyRole(ADMIN)
     {
         _addLocalContractAllowList(transferer);
     }
@@ -55,16 +59,39 @@ contract TestNFTcollection is ERC721AntiScam {
     function removeLocalContractAllowList(address transferer)
         external
         override
-        onlyOwner
+        onlyRole(ADMIN)
     {
         _removeLocalContractAllowList(transferer);
     }
 
-    function setCALLevel(uint256 level) external override onlyOwner {
+    function getLocalContractAllowList()
+        external
+        override
+        view
+        returns(address[] memory)
+    {
+        return _getLocalContractAllowList();
+    }
+
+    function setCALLevel(uint256 level) external override onlyRole(ADMIN) {
         CALLevel = level;
     }
 
-    function setCAL(address calAddress) external onlyOwner {
+    function setCAL(address calAddress) external onlyRole(ADMIN) {
         _setCAL(calAddress);
+    }
+
+    /*///////////////////////////////////////////////////////////////
+                    OVERRIDES ERC721AntiScam
+    //////////////////////////////////////////////////////////////*/
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721AntiScam, AccessControl)
+        returns (bool)
+    {
+        return
+            AccessControl.supportsInterface(interfaceId) ||
+            ERC721AntiScam.supportsInterface(interfaceId);
     }
 }

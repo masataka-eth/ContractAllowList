@@ -24,7 +24,7 @@ abstract contract ERC721RestrictApprove is ERC721Psi, IERC721RestrictApprove {
     }
 
     /*//////////////////////////////////////////////////////////////
-    ロック変数。トークンごとに個別ロック設定を行う
+    変数
     //////////////////////////////////////////////////////////////*/
     bool public enableRestrict = true;
 
@@ -54,6 +54,15 @@ abstract contract ERC721RestrictApprove is ERC721Psi, IERC721RestrictApprove {
     {
         localAllowedAddresses.remove(transferer);
         emit LocalCalRemoved(msg.sender, transferer);
+    }
+
+    function _getLocalContractAllowList()
+        internal
+        virtual
+        view
+        returns(address[] memory)
+    {
+        return localAllowedAddresses.values();
     }
 
     function _isLocalAllowed(address transferer)
@@ -185,14 +194,21 @@ abstract contract ERC721RestrictApprove is ERC721Psi, IERC721RestrictApprove {
         super.setApprovalForAll(operator, approved);
     }
 
+    function _beforeApprove(address to, uint256 tokenId)
+        internal
+        virtual
+    {
+        if (to != address(0)) {
+            require(_isAllowed(tokenId, to), "RestrictApprove: The contract is not allowed.");
+        }
+    }
+
     function approve(address to, uint256 tokenId)
         public
         virtual
         override
     {
-        if (to != address(0)) {
-            require(_isAllowed(tokenId, to), "RestrictApprove: The contract is not allowed.");
-        }
+        _beforeApprove(to, tokenId);
         super.approve(to, tokenId);
     }
 

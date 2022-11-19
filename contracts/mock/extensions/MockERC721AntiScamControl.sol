@@ -37,6 +37,15 @@ contract MockERC721AntiScamControl is ERC721AntiScamControl {
         _removeLocalContractAllowList(transferer);
     }
 
+    function getLocalContractAllowList()
+        external
+        override
+        view
+        returns(address[] memory)
+    {
+        return _getLocalContractAllowList();
+    }
+    
     function setCALLevel(uint256 level) external override onlyOwner {
         CALLevel = level;
     }
