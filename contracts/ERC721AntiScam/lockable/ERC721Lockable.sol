@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0;
 
 import "./IERC721Lockable.sol";
-import "erc721a/contracts/ERC721A.sol";
+import "erc721psi/contracts/ERC721Psi.sol";
 
 /// @title トークンのtransfer抑止機能付きコントラクト
 /// @dev Readmeを見てください。
 
-abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
+abstract contract ERC721Lockable is ERC721Psi, IERC721Lockable {
     /*//////////////////////////////////////////////////////////////
     ロック変数。トークンごとに個別ロック設定を行う
     //////////////////////////////////////////////////////////////*/
@@ -169,7 +169,6 @@ abstract contract ERC721Lockable is ERC721A, IERC721Lockable {
 
     function approve(address to, uint256 tokenId)
         public
-        payable
         virtual
         override
     {

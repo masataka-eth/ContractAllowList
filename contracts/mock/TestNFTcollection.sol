@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../ERC721AntiScam/ERC721AntiScam.sol";
 
 contract TestNFTcollection is ERC721AntiScam {
-    constructor(address _cal) ERC721A("TestNFTcollection", "TEST") {
+    constructor(address _cal) ERC721Psi("TestNFTcollection", "TEST") {
         _setCAL(_cal);
     }
 
