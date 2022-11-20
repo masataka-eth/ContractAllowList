@@ -42,6 +42,7 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
     function isLocked(uint256 tokenId)
         public
         view
+        virtual
         existToken(tokenId)
         returns (bool)
     {
@@ -60,7 +61,7 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
         return false;
     }
 
-    function isLocked(address holder) public view returns (bool) {
+    function isLocked(address holder) public view virtual returns (bool) {
         if (!enableLock) {
             return false;
         }
@@ -76,7 +77,12 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
         return false;
     }
 
-    function getTokensUnderLock() public view returns (uint256[] memory) {
+    function getTokensUnderLock()
+        public
+        view
+        virtual
+        returns (uint256[] memory)
+    {
         uint256 start = _startTokenId();
         uint256 end = _nextTokenId();
 
@@ -86,6 +92,7 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
     function getTokensUnderLock(uint256 start, uint256 end)
         public
         view
+        virtual
         returns (uint256[] memory)
     {
         bool[] memory lockList = new bool[](end - start + 1);
@@ -124,6 +131,7 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
 
     function _setTokenLock(uint256[] calldata tokenIds, LockStatus lockStatus)
         internal
+        virtual
     {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             tokenLock[tokenIds[i]] = lockStatus;
@@ -136,12 +144,15 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
         }
     }
 
-    function _setWalletLock(address to, LockStatus lockStatus) internal {
+    function _setWalletLock(address to, LockStatus lockStatus)
+        internal
+        virtual
+    {
         walletLock[to] = lockStatus;
         emit WalletLock(to, msg.sender, lockStatus);
     }
 
-    function _setContractLock(LockStatus lockStatus) internal {
+    function _setContractLock(LockStatus lockStatus) internal virtual {
         contractLockStatus = lockStatus;
     }
 
@@ -174,18 +185,17 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
         super.setApprovalForAll(operator, approved);
     }
 
-    function _beforeApprove(address /**to**/, uint256 tokenId) internal virtual {
+    function _beforeApprove(
+        address, /**to**/
+        uint256 tokenId
+    ) internal virtual {
         require(
             isLocked(tokenId) == false,
             "Lockable: Can not approve locked token"
         );
     }
 
-    function approve(address to, uint256 tokenId)
-        public
-        virtual
-        override
-    {
+    function approve(address to, uint256 tokenId) public virtual override {
         _beforeApprove(to, tokenId);
         super.approve(to, tokenId);
     }
