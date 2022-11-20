@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0;
 
 import "./IERC721Lockable.sol";
-import "erc721psi/contracts/ERC721Psi.sol";
+import "erc721psi/contracts/extension/ERC721PsiBurnable.sol";
 
 /// @title トークンのtransfer抑止機能付きコントラクト
 /// @dev Readmeを見てください。
 
-abstract contract ERC721Lockable is ERC721Psi, IERC721Lockable {
+abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
     /*//////////////////////////////////////////////////////////////
     ロック変数。トークンごとに個別ロック設定を行う
     //////////////////////////////////////////////////////////////*/
