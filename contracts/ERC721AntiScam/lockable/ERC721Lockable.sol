@@ -43,6 +43,7 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
         public
         view
         virtual
+        override
         existToken(tokenId)
         returns (bool)
     {
@@ -81,6 +82,7 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
         public
         view
         virtual
+        override
         returns (uint256[] memory)
     {
         uint256 start = _startTokenId();
@@ -93,6 +95,7 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
         public
         view
         virtual
+        override
         returns (uint256[] memory)
     {
         bool[] memory lockList = new bool[](end - start + 1);
