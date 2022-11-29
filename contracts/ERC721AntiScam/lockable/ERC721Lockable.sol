@@ -62,7 +62,7 @@ abstract contract ERC721Lockable is ERC721PsiBurnable, IERC721Lockable {
         return false;
     }
 
-    function isLocked(address holder) public view virtual returns (bool) {
+    function isLocked(address holder) public view virtual override returns (bool) {
         if (!enableLock) {
             return false;
         }
