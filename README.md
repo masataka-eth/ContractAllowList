@@ -24,11 +24,9 @@ We want to put in place a system to minimize the damage from NFT fraud.
 - Only accept approve from a limited number of contract addresses.
 - Lock token and prevent transfer.
 
-# Target Contracts
+2023.1.22現在では以下URLが最もわかりやすい解説記事ですので、利用時にはこちらを参考にしてください（記事作成者:@syunduel）
+※ただしご利用は全て自己責任としていただき、記事作成者は一切の責任を追いません。
 
-contracts>libs>ContractAllowList.sol
-*icontracts>interface>iContractAllowList.sol
+https://note.com/syunduel/n/ncfb15c278766
 
-# Use Sample
 
-contracts>TestNFTcollection.sol
