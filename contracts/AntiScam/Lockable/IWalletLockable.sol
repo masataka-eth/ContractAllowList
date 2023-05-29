@@ -23,9 +23,9 @@ interface IWalletLockable {
     function walletLock(address holder) external view returns (LockStatus);
 
     /**
-     * @dev Set lock status of specified address.
+     * @dev Set lock status of self wallet.
      */
-    function setWalletLock(address to, LockStatus lockStatus) external;
+    function setWalletLock(LockStatus lockStatus) external;
 
     /**
      * @dev Set default lock status.

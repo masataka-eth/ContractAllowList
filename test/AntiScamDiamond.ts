@@ -101,7 +101,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(Lock);
         await exampleERC721Psi.connect(owner).setContractLock(UnLock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, UnLock);
+        await exampleERC721Psi.connect(account).setWalletLock(UnLock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .not.to.be.reverted
       })
@@ -112,7 +112,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(UnLock);
         await exampleERC721Psi.connect(owner).setContractLock(UnLock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, UnSet);
+        await exampleERC721Psi.connect(account).setWalletLock(UnSet);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .not.to.be.reverted
       })
@@ -123,7 +123,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(UnLock);
         await exampleERC721Psi.connect(owner).setContractLock(UnLock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, UnLock);
+        await exampleERC721Psi.connect(account).setWalletLock(UnLock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .not.to.be.reverted
       })
@@ -135,7 +135,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(Lock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, Lock);
+        await exampleERC721Psi.connect(account).setWalletLock(Lock);
         await exampleERC721Psi.connect(owner).setContractLock(UnLock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -146,7 +146,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(Lock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, UnSet);
+        await exampleERC721Psi.connect(account).setWalletLock(UnSet);
         await exampleERC721Psi.connect(owner).setContractLock(UnLock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -157,7 +157,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(UnLock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, Lock);
+        await exampleERC721Psi.connect(account).setWalletLock(Lock);
         await exampleERC721Psi.connect(owner).setContractLock(UnLock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -168,7 +168,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(Lock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, Lock);
+        await exampleERC721Psi.connect(account).setWalletLock(Lock);
         await exampleERC721Psi.connect(owner).setContractLock(Lock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -179,7 +179,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(Lock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, UnLock);
+        await exampleERC721Psi.connect(account).setWalletLock(UnLock);
         await exampleERC721Psi.connect(owner).setContractLock(Lock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -190,7 +190,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(Lock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, UnSet);
+        await exampleERC721Psi.connect(account).setWalletLock(UnSet);
         await exampleERC721Psi.connect(owner).setContractLock(Lock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -201,7 +201,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(UnLock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, Lock);
+        await exampleERC721Psi.connect(account).setWalletLock(Lock);
         await exampleERC721Psi.connect(owner).setContractLock(Lock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -212,7 +212,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(UnLock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, UnLock);
+        await exampleERC721Psi.connect(account).setWalletLock(UnLock);
         await exampleERC721Psi.connect(owner).setContractLock(Lock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -223,7 +223,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(UnLock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, UnSet);
+        await exampleERC721Psi.connect(account).setWalletLock(UnSet);
         await exampleERC721Psi.connect(owner).setContractLock(Lock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -234,7 +234,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(Lock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, Lock);
+        await exampleERC721Psi.connect(account).setWalletLock(Lock);
         await exampleERC721Psi.connect(owner).setContractLock(UnLock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -245,7 +245,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(UnLock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, Lock);
+        await exampleERC721Psi.connect(account).setWalletLock(Lock);
         await exampleERC721Psi.connect(owner).setContractLock(UnLock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -256,7 +256,7 @@ describe("AntiScamWallet with ERC721Psi", function () {
         await exampleERC721Psi.connect(account).mint(1, { value: ethers.utils.parseEther("1") })
         await exampleERC721Psi.connect(owner).setCALLevel(1);  //level 0は全拒否
         await exampleERC721Psi.connect(owner).setDefaultLock(Lock);
-        await exampleERC721Psi.connect(account).setWalletLock(account.address, UnSet);
+        await exampleERC721Psi.connect(account).setWalletLock(UnSet);
         await exampleERC721Psi.connect(owner).setContractLock(UnLock);
         await expect(exampleERC721Psi.connect(account).approve(owner.address, 0))
           .to.be.reverted
@@ -399,12 +399,12 @@ describe("AntiScamWallet with ERC721Psi", function () {
       expect(await exampleERC721Psi["getTokensUnderLock(uint256,uint256)"](3, 5)).to.deep.equals([3, 5]);
 
       // wallet lock
-      await exampleERC721Psi.connect(account).setWalletLock(account.address, Lock)
+      await exampleERC721Psi.connect(account).setWalletLock(Lock)
       expect(await exampleERC721Psi["getTokensUnderLock()"]()).to.deep.equals([...Array(10)].map((_, i) => i))
       expect(await exampleERC721Psi["getTokensUnderLock(uint256,uint256)"](3, 5)).to.deep.equals([3, 4, 5]);
 
       // contract lock
-      await exampleERC721Psi.connect(account).setWalletLock(account.address, UnSet)
+      await exampleERC721Psi.connect(account).setWalletLock(UnSet)
       await exampleERC721Psi.connect(owner).setContractLock(Lock)
       expect(await exampleERC721Psi["getTokensUnderLock()"]()).to.deep.equals([...Array(20)].map((_, i) => i))
       expect(await exampleERC721Psi["getTokensUnderLock(uint256,uint256)"](9, 11)).to.deep.equals([9, 10, 11]);

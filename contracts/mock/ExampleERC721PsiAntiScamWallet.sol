@@ -24,12 +24,11 @@ contract ExampleERC721PsiAntiScamWallet is ERC721Psi, AntiScamWallet, AccessCont
                         OVERRIDES WalletLockable
     //////////////////////////////////////////////////////////////*/
 
-    function setWalletLock(address to, LockStatus lockStatus)
+    function setWalletLock(LockStatus lockStatus)
         external
         override
     {
-        require(to == msg.sender, "not yourself.");
-        _setWalletLock(to, lockStatus);
+        _setWalletLock(msg.sender, lockStatus);
     }
 
     function unlockWalletByAdmin(address to) external onlyRole(ADMIN) {
