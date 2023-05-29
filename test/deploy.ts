@@ -48,18 +48,24 @@ export const deploy = async (owner: Signer) => {
   const TestNFTcollection = await ethers.getContractFactory("TestNFTcollection")
   const testNFT = await TestNFTcollection.connect(owner).deploy(contractAllowList.address)
   await testNFT.deployed()
+  
+  const ExampleERC721PsiAntiScamWallet = await ethers.getContractFactory("ExampleERC721PsiAntiScamWallet")
+  const exampleERC721Psi = await ExampleERC721PsiAntiScamWallet.connect(owner).deploy(contractAllowList.address)
+  await exampleERC721Psi.deployed()
 
   for (const allowd of allowedAddressesLocal) {
     await testNFT.connect(owner).addLocalContractAllowList(allowd)
+    await exampleERC721Psi.connect(owner).addLocalContractAllowList(allowd)
   }
 
   await testNFT.connect(owner).setCALLevel(0)
+  await exampleERC721Psi.connect(owner).setCALLevel(0)
 
   const MarketDummy = await ethers.getContractFactory("MarketDummy")
   const market = await MarketDummy.connect(owner).deploy()
   await market.deployed()
 
-  return { calVoteToken, timelock, calGoverner, contractAllowList, contractAllowListProxy, testNFT, market }
+  return { calVoteToken, timelock, calGoverner, contractAllowList, contractAllowListProxy, testNFT, exampleERC721Psi, market }
 }
 
 export default deploy

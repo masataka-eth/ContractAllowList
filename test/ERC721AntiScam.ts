@@ -30,7 +30,7 @@ describe("ERC721AntiScam", function () {
         .to.equals(false)
     })
   })
-
+  
   describe("setApprovalForAll", () => {
     it("指定レベルの認可対象は成功すること", async () => {
       const { testNFT, account, owner } = await loadFixture(fixture)

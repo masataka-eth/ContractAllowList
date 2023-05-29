@@ -1,0 +1,6 @@
+ds-test/=lib/forge-std/lib/ds-test/src/
+forge-std/=lib/forge-std/src/
+contracts/=contracts/
+@openzeppelin/=node_modules/@openzeppelin/
+erc721psi/=node_modules/erc721psi/
+solidity-bits/=node_modules/solidity-bits/
