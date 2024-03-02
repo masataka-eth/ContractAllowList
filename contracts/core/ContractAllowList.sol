@@ -101,11 +101,14 @@ contract ContractAllowList is IContractAllowList, AccessControlEnumerable {
         }
 
         bool Allowed = false;
-        for(uint256 i = 1; i < _level + 1; i++){
-            if(allowedAddresses[i].contains(_transferer) == true){
-                Allowed = true;
-                break;
-            }
+        // for(uint256 i = 1; i < _level + 1; i++){
+        //     if(allowedAddresses[i].contains(_transferer) == true){
+        //         Allowed = true;
+        //         break;
+        //     }
+        // }
+        if(allowedAddresses[_level].contains(_transferer) == true){
+            Allowed = true;
         }
         return Allowed;
     }
